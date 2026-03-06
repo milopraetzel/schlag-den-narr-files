@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Schlag den Narr — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -46,25 +46,39 @@
   #top-bar {
     position: relative; z-index: 10;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 32px;
+    padding: 0 36px;
+    height: 64px;
     border-bottom: 1px solid var(--border);
-    background: rgba(8,12,20,0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(6,9,15,0.92);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 rgba(232,180,0,0.25);
   }
   #top-bar .show-title {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 1.6rem; letter-spacing: 6px; color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 8px; color: var(--gold);
     text-transform: uppercase;
   }
   #top-bar .game-badge {
     font-family: 'Oswald', sans-serif; font-weight: 600;
-    font-size: 1rem; letter-spacing: 3px; color: var(--text-dim);
+    font-size: 0.85rem; letter-spacing: 4px; color: rgba(255,255,255,0.85);
     text-transform: uppercase;
-    background: var(--blue-dark); padding: 6px 18px; border-radius: 3px;
+    background: var(--blue-dark); padding: 6px 20px; border-radius: 2px;
+    border: 1px solid rgba(0,85,204,0.4);
   }
-  #top-bar .progress {
-    font-family: 'Roboto Condensed', sans-serif;
-    font-size: 0.9rem; color: var(--text-dim); letter-spacing: 2px;
+  #top-bar .live-dot {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 700;
+    font-size: 0.75rem; letter-spacing: 3px; color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  #top-bar .live-dot::before {
+    content: '';
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); animation: livePulse 2s infinite;
+  }
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
   }
 
   /* ── MAIN LAYOUT ── */
@@ -87,9 +101,20 @@
   #waiting {
     text-align: center;
   }
-  #waiting .big-icon { font-size: 5rem; margin-bottom: 20px; }
-  #waiting h1 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 3rem; color: var(--gold); letter-spacing: 6px; }
-  #waiting p { color: var(--text-dim); margin-top: 12px; font-size: 1.1rem; letter-spacing: 2px; }
+  .waiting-ring {
+    width: 80px; height: 80px; border-radius: 50%;
+    border: 3px solid rgba(232,180,0,0.15);
+    border-top-color: var(--gold);
+    animation: ringSpin 3s linear infinite;
+    margin: 0 auto 28px;
+  }
+  @keyframes ringSpin { to { transform: rotate(360deg); } }
+  #waiting h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    color: var(--gold); letter-spacing: 12px;
+  }
+  #waiting p { color: var(--text-dim); margin-top: 14px; font-size: 1rem; letter-spacing: 4px; text-transform: uppercase; font-family: 'Roboto Condensed', sans-serif; }
 
   /* Photo reveal */
   #photo-display {
@@ -161,76 +186,89 @@
   #text-display {
     display: none; flex-direction: column; align-items: center; width: 100%; max-width: 700px; text-align: center;
   }
-  #text-display .game-icon { font-size: 4rem; margin-bottom: 16px; }
+  #text-display .game-category-bar {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--blue-dark); border: 1px solid rgba(0,85,204,0.4);
+    border-radius: 2px; padding: 5px 18px; margin-bottom: 18px;
+    font-family: 'Roboto Condensed', sans-serif; font-size: 0.72rem;
+    letter-spacing: 4px; color: rgba(255,255,255,0.7); text-transform: uppercase;
+  }
   #text-display .game-name {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: clamp(1.8rem, 3vw, 3rem); letter-spacing: 4px; color: var(--gold); text-transform: uppercase;
-    margin-bottom: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 4.5rem); letter-spacing: 6px; color: var(--gold); text-transform: uppercase;
+    margin-bottom: 20px; line-height: 1;
   }
   #text-display .content-text {
     font-family: 'Roboto Condensed', sans-serif;
-    font-size: clamp(1.2rem, 2.5vw, 2rem);
+    font-size: clamp(1.3rem, 2.5vw, 2.1rem);
     color: var(--text); line-height: 1.4;
     background: var(--panel); border: 1px solid var(--border);
     border-left: 4px solid var(--blue);
-    border-radius: 6px; padding: 24px 28px; width: 100%; text-align: left;
+    border-radius: 4px; padding: 26px 30px; width: 100%; text-align: left;
   }
 
   /* Result display */
   #result-display {
     display: none; flex-direction: column; align-items: center; width: 100%; max-width: 700px; text-align: center;
   }
-  #result-display .result-icon { font-size: 5rem; margin-bottom: 16px; }
+  .result-accent-bar {
+    width: 3px; height: 60px;
+    background: linear-gradient(180deg, var(--gold), transparent);
+    margin: 0 auto 20px;
+  }
   #result-display .result-title {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: clamp(1.6rem, 3vw, 2.8rem); letter-spacing: 3px;
-    color: var(--gold); text-transform: uppercase; margin-bottom: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 5rem); letter-spacing: 6px;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 8px; line-height: 1;
   }
   #result-display .result-pts {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 4rem; color: #fff; letter-spacing: 4px;
-    text-shadow: 0 0 40px rgba(232,180,0,0.5);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 7vw, 7rem); color: #fff; letter-spacing: 6px;
+    text-shadow: 0 0 60px rgba(232,180,0,0.4);
   }
 
   /* ── RIGHT SIDEBAR: SCOREBOARD ── */
   #sidebar {
     display: flex; flex-direction: column;
-    padding: 28px 24px;
-    background: rgba(8,12,20,0.5);
+    padding: 24px 22px;
+    background: rgba(6,9,15,0.6);
+    border-left: 1px solid var(--border);
     overflow-y: auto;
   }
   #sidebar .sb-title {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 0.8rem; letter-spacing: 4px; color: var(--text-dim);
-    text-transform: uppercase; margin-bottom: 20px;
-    border-bottom: 1px solid var(--border); padding-bottom: 10px;
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 400;
+    font-size: 0.68rem; letter-spacing: 5px; color: var(--text-dim);
+    text-transform: uppercase; margin-bottom: 18px;
+    border-bottom: 1px solid var(--border); padding-bottom: 12px;
   }
   .sb-player {
-    display: flex; align-items: center; gap: 14px;
-    padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
     transition: all 0.4s;
   }
   .sb-player:last-child { border-bottom: none; }
   .sb-rank {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 1.1rem; color: var(--text-dim); min-width: 24px; text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem; color: var(--text-dim); min-width: 22px; text-align: center;
+    letter-spacing: 1px;
   }
   .sb-rank.first { color: var(--gold); }
-  .sb-icon { font-size: 1.4rem; }
   .sb-name {
     flex: 1; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;
-    font-size: 1.1rem; color: var(--text); text-transform: uppercase; letter-spacing: 1px;
+    font-size: 1.05rem; color: var(--text); text-transform: uppercase; letter-spacing: 1px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .sb-score {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 1.8rem; color: #fff; min-width: 50px; text-align: right;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; color: #fff; min-width: 48px; text-align: right;
+    letter-spacing: 2px;
   }
+  .sb-player.sb-first .sb-score { color: var(--gold); }
   .sb-score-bar-wrap {
-    width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 6px;
+    width: 100%; height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; margin-top: 5px;
   }
-  .sb-score-bar { height: 4px; border-radius: 2px; background: var(--blue); transition: width 0.6s ease; }
-  .sb-player-row { flex: 1; }
+  .sb-score-bar { height: 3px; border-radius: 2px; background: var(--blue); transition: width 0.6s ease; }
+  .sb-player-row { flex: 1; overflow: hidden; }
 
   /* Current matchup */
   #current-matchup {
@@ -293,9 +331,9 @@
 
 <!-- TOP BAR -->
 <div id="top-bar">
-  <div class="show-title">🤡 Schlag den Narr</div>
+  <div class="show-title">Schlag den Narr</div>
   <div class="game-badge" id="game-badge">Warte auf Moderator...</div>
-  <div class="progress" id="top-progress">–</div>
+  <div class="live-dot">Live</div>
 </div>
 
 <!-- MAIN -->
@@ -305,17 +343,17 @@
   <div id="center">
     <!-- Waiting -->
     <div id="waiting">
-      <div class="big-icon">🎭</div>
+      <div class="waiting-ring"></div>
       <h1>BEREIT</h1>
-      <p>Warte auf den Start...</p>
+      <p>Warte auf den Start</p>
     </div>
 
     <!-- Photo reveal -->
     <div id="photo-display">
-      <div class="game-label">📸 Wer bin ich?</div>
+      <div class="game-label">Wer bin ich?</div>
       <div id="photo-img-container">
         <img id="dash-photo-img" class="dash-photo" src="" style="display:none; filter:blur(30px);">
-        <div id="dash-photo-emoji" class="dash-emoji" style="filter:blur(30px);">🎭</div>
+        <div id="dash-photo-emoji" class="dash-emoji" style="filter:blur(30px);"></div>
       </div>
       <div class="timer-bar-wrap"><div class="timer-bar-fill" id="dash-timer-bar" style="width:100%"></div></div>
     </div>
@@ -328,14 +366,14 @@
 
     <!-- Generic text content -->
     <div id="text-display">
-      <div class="game-icon" id="text-game-icon">🎮</div>
+      <div class="game-category-bar" id="text-game-icon"></div>
       <div class="game-name" id="text-game-name">–</div>
       <div class="content-text" id="text-content">–</div>
     </div>
 
     <!-- Result display -->
     <div id="result-display">
-      <div class="result-icon" id="result-icon">🏆</div>
+      <div class="result-accent-bar"></div>
       <div class="result-title" id="result-title">–</div>
       <div class="result-pts" id="result-pts"></div>
     </div>
@@ -388,16 +426,13 @@ function updateScoreboard(allScores, allPlayers) {
   if (!allScores || !allPlayers) return;
   const sorted = [...allPlayers].sort((a,b) => (allScores[b]||0) - (allScores[a]||0));
   const maxScore = Math.max(1, ...sorted.map(p => allScores[p]||0));
-  const icons = ['⭐','⚔️','🔥','💥','🎯','🌟'];
 
   document.getElementById('scoreboard-list').innerHTML = sorted.map((p, i) => {
     const score = allScores[p] || 0;
     const isFirst = i === 0 && score > 0;
-    const origIdx = allPlayers.indexOf(p);
     return `
-      <div class="sb-player">
+      <div class="sb-player${isFirst ? ' sb-first' : ''}">
         <div class="sb-rank ${isFirst ? 'first' : ''}">${i+1}</div>
-        <div class="sb-icon">${icons[origIdx] || '👤'}</div>
         <div class="sb-player-row">
           <div class="sb-name">${p}</div>
           <div class="sb-score-bar-wrap">
@@ -448,10 +483,7 @@ channel.on('broadcast', { event: 'game_state' }, ({ payload }) => {
 
   // Update top bar
   if (gameName) {
-    document.getElementById('game-badge').textContent = `${gameIcon || ''} ${gameName}`;
-  }
-  if (playedCount !== undefined && maxGames) {
-    document.getElementById('top-progress').textContent = `Spiel ${playedCount + 1} / ${maxGames}`;
+    document.getElementById('game-badge').textContent = gameName;
   }
 
   // Matchup
@@ -466,11 +498,10 @@ channel.on('broadcast', { event: 'game_state' }, ({ payload }) => {
       // Will be handled by 'display' event
     } else if (gameId === 'quiz_general' || gameId === 'quiz_birthday') {
       showPanel('quiz-display');
-      document.getElementById('game-badge').textContent = `${gameIcon} ${gameName}`;
     } else {
       // Generic: show game name + waiting
       showPanel('text-display');
-      document.getElementById('text-game-icon').textContent = gameIcon || '🎮';
+      document.getElementById('text-game-icon').textContent = '';
       document.getElementById('text-game-name').textContent = gameName || '';
       document.getElementById('text-content').textContent = 'Spiel läuft...';
     }
@@ -478,8 +509,6 @@ channel.on('broadcast', { event: 'game_state' }, ({ payload }) => {
 
   if (phase === 'result') {
     showPanel('result-display');
-    const icon = resultWinSide ? '🏆' : '🤝';
-    document.getElementById('result-icon').textContent = icon;
     document.getElementById('result-title').textContent = resultTitle || '';
     document.getElementById('result-pts').textContent = resultPts > 0 ? `+${resultPts} Punkte` : '';
     if (resultPts > 0) spawnConfetti();
@@ -495,7 +524,7 @@ channel.on('broadcast', { event: 'display' }, ({ payload }) => {
 
   if (type === 'photo_blur') {
     showPanel('photo-display');
-    document.getElementById('game-badge').textContent = '📸 Wer bin ich?';
+    document.getElementById('game-badge').textContent = 'Wer bin ich?';
     const imgEl = document.getElementById('dash-photo-img');
     const emojiEl = document.getElementById('dash-photo-emoji');
     const blurVal = payload.blurLevel || 0;
@@ -544,7 +573,7 @@ channel.on('broadcast', { event: 'display' }, ({ payload }) => {
 
   if (type === 'word_category') {
     showPanel('text-display');
-    document.getElementById('text-game-icon').textContent = '🔤';
+    document.getElementById('text-game-icon').textContent = 'Wörter';
     document.getElementById('text-game-name').textContent = 'Wörter-Staffel';
     document.getElementById('text-content').innerHTML =
       `<strong>Kategorie:</strong><br>${payload.catName}<br><small style="opacity:0.5;">z.B. ${(payload.examples||[]).join(', ')}</small>`;
@@ -552,29 +581,29 @@ channel.on('broadcast', { event: 'display' }, ({ payload }) => {
 
   if (type === 'number_question') {
     showPanel('text-display');
-    document.getElementById('text-game-icon').textContent = '🔢';
+    document.getElementById('text-game-icon').textContent = 'Zahlen';
     document.getElementById('text-game-name').textContent = 'Zahlen-Duell';
     document.getElementById('text-content').textContent = payload.question || '';
   }
 
   if (type === 'tf_question') {
     showPanel('text-display');
-    document.getElementById('text-game-icon').textContent = '✅';
+    document.getElementById('text-game-icon').textContent = 'Wahr / Falsch';
     document.getElementById('text-game-name').textContent = 'Wahr oder Falsch';
     document.getElementById('text-content').textContent = payload.question || '';
   }
 
   if (type === 'emoji_question') {
     showPanel('text-display');
-    document.getElementById('text-game-icon').textContent = payload.emojis || '🤩';
+    document.getElementById('text-game-icon').textContent = payload.emojis || 'Emojis';
     document.getElementById('text-game-name').textContent = 'Emoji-Rätsel';
     document.getElementById('text-content').textContent = `Was bedeuten diese Emojis?\n(${payload.hint || ''})`;
   }
 
   if (type === 'physical') {
     showPanel('text-display');
-    document.getElementById('text-game-icon').textContent = payload.icon || '🏃';
-    document.getElementById('text-game-name').textContent = payload.name || 'Körper-Challenge';
+    document.getElementById('text-game-icon').textContent = 'Challenge';
+    document.getElementById('text-game-name').textContent = payload.name || 'Sport-Challenge';
     document.getElementById('text-content').textContent = payload.desc || '';
   }
 });

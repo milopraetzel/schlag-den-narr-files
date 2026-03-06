@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schlag den Narr 🤡 — Setup</title>
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<title>Schlag den Narr — Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --gold: #E8B400;
+    --gold-dim: rgba(232,180,0,0.15);
     --blue: #0055CC;
     --blue-dark: #003388;
     --red: #CC1100;
-    --dark: #080C14;
-    --panel: #0D1422;
-    --panel2: #111926;
-    --border: rgba(255,255,255,0.12);
+    --dark: #06090F;
+    --panel: #0C1220;
+    --panel2: #101828;
+    --border: rgba(255,255,255,0.10);
     --text: #E8EAF0;
-    --text-dim: rgba(232,234,240,0.55);
+    --text-dim: rgba(232,234,240,0.50);
     --green: #00BB55;
     --cyan: #00AADD;
   }
@@ -31,39 +32,53 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 48px 20px 60px;
+    padding: 56px 20px 72px;
   }
 
   body::before {
     content: '';
     position: fixed; inset: 0;
     background:
-      radial-gradient(ellipse 120% 60% at 50% 0%, rgba(0,55,150,0.3) 0%, transparent 65%),
-      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(0,30,80,0.4) 0%, transparent 60%);
+      radial-gradient(ellipse 100% 55% at 50% 0%,   rgba(0,55,150,0.28) 0%, transparent 65%),
+      radial-gradient(ellipse 70%  45% at 50% 110%,  rgba(232,180,0,0.07)  0%, transparent 60%),
+      radial-gradient(ellipse 60%  35% at 50% 100%,  rgba(0,20,60,0.5)    0%, transparent 55%);
     pointer-events: none; z-index: 0;
   }
 
   .content {
     position: relative; z-index: 1;
-    width: 100%; max-width: 860px;
+    width: 100%; max-width: 880px;
     display: flex; flex-direction: column; align-items: center;
   }
 
   /* ── HEADER ── */
-  .jester { font-size: clamp(2.5rem, 8vw, 4rem); text-align: center; margin-bottom: 8px; }
-  .logo {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: clamp(2.2rem, 9vw, 5rem);
-    letter-spacing: 6px; color: var(--gold);
-    text-align: center; text-transform: uppercase;
-    text-shadow: 0 0 60px rgba(232,180,0,0.35), 0 4px 0 rgba(0,0,0,0.8);
-    line-height: 1;
+  .eyebrow {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 400;
+    font-size: 0.72rem; letter-spacing: 6px; color: var(--text-dim);
+    text-transform: uppercase; margin-bottom: 10px;
+    text-align: center;
   }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.2rem, 10vw, 6.5rem);
+    letter-spacing: 10px; color: var(--gold);
+    text-align: center; text-transform: uppercase;
+    text-shadow: 0 0 80px rgba(232,180,0,0.3), 0 3px 0 rgba(0,0,0,0.9);
+    line-height: 0.95;
+  }
+
+  .title-line {
+    width: 120px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 18px auto 10px;
+  }
+
   .subtitle {
-    font-family: 'Roboto Condensed', sans-serif;
-    font-size: 0.9rem; color: var(--text-dim);
-    letter-spacing: 8px; text-align: center; text-transform: uppercase;
-    margin: 10px 0 48px;
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 400;
+    font-size: 0.78rem; color: var(--text-dim);
+    letter-spacing: 7px; text-align: center; text-transform: uppercase;
+    margin-bottom: 52px;
   }
 
   .divider {
@@ -72,90 +87,99 @@
     margin: 36px auto;
   }
 
-  /* ── DEVICE CARDS ── */
+  /* ── SECTION LABEL ── */
   .section-label {
-    font-family: 'Oswald', sans-serif; font-weight: 600;
-    font-size: 0.8rem; letter-spacing: 4px; color: var(--text-dim);
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 400;
+    font-size: 0.7rem; letter-spacing: 5px; color: var(--text-dim);
     text-transform: uppercase; margin-bottom: 20px; text-align: center;
   }
 
+  /* ── DEVICE CARDS ── */
   .devices-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px; width: 100%; margin-bottom: 0;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px; width: 100%;
   }
 
   .device-card {
     background: var(--panel); border: 1px solid var(--border);
-    border-radius: 8px; padding: 28px 22px 22px;
+    border-radius: 6px; padding: 32px 24px 24px;
     text-align: center; text-decoration: none; color: var(--text);
     transition: all 0.2s; position: relative; overflow: hidden;
     cursor: pointer; display: flex; flex-direction: column; align-items: center;
   }
   .device-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    border-radius: 8px 8px 0 0;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   }
-  .device-card.host::before  { background: linear-gradient(90deg, var(--gold), #FF8800); }
-  .device-card.tv::before    { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
-  .device-card.buzzer::before{ background: linear-gradient(90deg, var(--red), #FF4400); }
+  .device-card.host::before   { background: linear-gradient(90deg, var(--gold), #FFAA00); }
+  .device-card.tv::before     { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+  .device-card.buzzer::before { background: linear-gradient(90deg, var(--red), #FF4400); }
 
-  .device-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .device-card:hover { border-color: rgba(255,255,255,0.22); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.5); }
 
-  .device-icon { font-size: 2.8rem; margin-bottom: 14px; }
+  /* Colored letter badge replaces emoji */
+  .device-icon {
+    width: 54px; height: 54px; border-radius: 5px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: 2px;
+  }
+  .device-card.host   .device-icon { background: var(--gold); color: #0A0A0A; }
+  .device-card.tv     .device-icon { background: var(--blue); color: #fff; }
+  .device-card.buzzer .device-icon { background: var(--red);  color: #fff; }
+
   .device-name {
     font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 1.25rem; letter-spacing: 2px; text-transform: uppercase;
+    font-size: 1.2rem; letter-spacing: 3px; text-transform: uppercase;
     color: #fff; margin-bottom: 4px;
   }
   .device-badge {
-    display: inline-block; font-size: 0.7rem; letter-spacing: 2px;
+    display: inline-block; font-size: 0.65rem; letter-spacing: 2px;
     text-transform: uppercase; color: var(--text-dim);
-    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-    border-radius: 2px; padding: 3px 10px; margin-bottom: 14px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 2px; padding: 3px 10px; margin-bottom: 16px;
   }
   .device-desc {
-    font-size: 0.88rem; color: rgba(255,255,255,0.65);
-    line-height: 1.55; flex: 1;
+    font-size: 0.87rem; color: rgba(255,255,255,0.6);
+    line-height: 1.6; flex: 1;
   }
   .open-btn {
-    display: inline-block; margin-top: 18px;
-    padding: 11px 26px;
+    display: inline-block; margin-top: 20px;
+    padding: 12px 28px;
     font-family: 'Oswald', sans-serif; font-weight: 600;
-    font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;
-    border-radius: 4px; border-bottom: 3px solid rgba(0,0,0,0.3);
+    font-size: 0.88rem; letter-spacing: 3px; text-transform: uppercase;
+    border-radius: 3px; border-bottom: 3px solid rgba(0,0,0,0.4);
     transition: filter 0.15s;
   }
-  .open-btn:hover { filter: brightness(1.15); }
-  .device-card.host  .open-btn { background: var(--gold); color: #0D0D0D; border-bottom-color: #A07800; }
-  .device-card.tv    .open-btn { background: var(--blue); color: #fff; border-bottom-color: var(--blue-dark); }
-  .device-card.buzzer .open-btn { background: var(--red); color: #fff; border-bottom-color: #880000; }
+  .open-btn:hover { filter: brightness(1.12); }
+  .device-card.host   .open-btn { background: var(--gold); color: #0A0A0A; border-bottom-color: #9A7200; }
+  .device-card.tv     .open-btn { background: var(--blue); color: #fff;    border-bottom-color: var(--blue-dark); }
+  .device-card.buzzer .open-btn { background: var(--red);  color: #fff;    border-bottom-color: #880000; }
 
   /* ── SETUP STEPS ── */
   .steps-card {
     background: var(--panel); border: 1px solid var(--border);
-    border-radius: 8px; padding: 28px 32px;
+    border-radius: 6px; padding: 30px 34px;
     width: 100%;
   }
   .steps-title {
     font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 1rem; letter-spacing: 4px; color: var(--gold);
+    font-size: 0.78rem; letter-spacing: 5px; color: var(--gold);
     text-transform: uppercase; margin-bottom: 24px;
-    border-bottom: 1px solid var(--border); padding-bottom: 12px;
+    border-bottom: 1px solid var(--border); padding-bottom: 14px;
   }
   .step {
     display: flex; align-items: flex-start; gap: 18px; margin-bottom: 18px;
   }
   .step:last-child { margin-bottom: 0; }
   .step-num {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--blue-dark); border: 1px solid var(--blue);
+    width: 26px; height: 26px; border-radius: 3px;
+    background: var(--blue-dark); border: 1px solid rgba(0,85,204,0.5);
     display: flex; align-items: center; justify-content: center;
     font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 0.85rem; color: #fff; flex-shrink: 0; margin-top: 1px;
+    font-size: 0.8rem; color: #fff; flex-shrink: 0; margin-top: 2px;
   }
   .step-text {
-    font-size: 0.92rem; color: rgba(255,255,255,0.78); line-height: 1.6;
+    font-size: 0.9rem; color: rgba(255,255,255,0.72); line-height: 1.65;
   }
   .step-text strong { color: var(--gold); font-weight: 700; }
 
@@ -166,17 +190,18 @@
   }
   .game-pill {
     background: var(--panel2); border: 1px solid var(--border);
-    border-radius: 3px; padding: 6px 14px;
-    font-family: 'Roboto Condensed', sans-serif;
-    font-size: 0.82rem; color: rgba(255,255,255,0.7);
-    letter-spacing: 1px; text-transform: uppercase;
+    border-radius: 2px; padding: 6px 16px;
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 700;
+    font-size: 0.72rem; color: rgba(255,255,255,0.6);
+    letter-spacing: 2px; text-transform: uppercase;
   }
 
   /* ── FOOTER ── */
   .footer {
-    margin-top: 40px;
-    font-size: 0.75rem; color: var(--text-dim); text-align: center;
-    letter-spacing: 2px; opacity: 0.5;
+    margin-top: 44px;
+    font-size: 0.68rem; color: var(--text-dim); text-align: center;
+    letter-spacing: 4px; opacity: 0.4; text-transform: uppercase;
+    font-family: 'Roboto Condensed', sans-serif;
   }
 </style>
 </head>
@@ -184,43 +209,44 @@
 <div class="content">
 
   <!-- HEADER -->
-  <div class="jester">🤡</div>
+  <div class="eyebrow">Geburtstags-Edition</div>
   <div class="logo">Schlag den Narr</div>
-  <div class="subtitle">⭐ Die Geburtstags-Gameshow ⭐</div>
+  <div class="title-line"></div>
+  <div class="subtitle">Die Geburtstags-Gameshow</div>
 
   <!-- DEVICES -->
   <div class="section-label">Welches Gerät bist du?</div>
   <div class="devices-grid">
 
     <a href="host.html" class="device-card host">
-      <div class="device-icon">🎮</div>
+      <div class="device-icon">MOD</div>
       <div class="device-name">Moderator</div>
-      <div class="device-badge">Laptop / Tablet</div>
+      <div class="device-badge">Laptop &middot; Tablet</div>
       <div class="device-desc">
         Das Haupt-Gerät. Hier werden Spiele gewählt, Punkte vergeben und das Spiel gesteuert.
         Nur der Moderator braucht das.
       </div>
-      <div class="open-btn">Spiel starten →</div>
+      <div class="open-btn">Spiel starten</div>
     </a>
 
     <a href="tv.html" class="device-card tv">
-      <div class="device-icon">📺</div>
+      <div class="device-icon">TV</div>
       <div class="device-name">TV / Beamer</div>
-      <div class="device-badge">Fernseher · Beamer</div>
+      <div class="device-badge">Fernseher &middot; Beamer</div>
       <div class="device-desc">
         Live-Scoreboard und Fragen-Anzeige für alle im Raum. Auf dem großen Bildschirm öffnen.
       </div>
-      <div class="open-btn">Anzeige öffnen →</div>
+      <div class="open-btn">Anzeige öffnen</div>
     </a>
 
     <a href="buzzer.html" class="device-card buzzer">
-      <div class="device-icon">📲</div>
+      <div class="device-icon">BUZ</div>
       <div class="device-name">Spieler-Buzzer</div>
-      <div class="device-badge">iPhone · Android</div>
+      <div class="device-badge">iPhone &middot; Android</div>
       <div class="device-desc">
         Jeder Spieler öffnet diese Seite auf seinem Handy. Gibt Namen ein und wählt seine Seite.
       </div>
-      <div class="open-btn">Buzzer öffnen →</div>
+      <div class="open-btn">Buzzer öffnen</div>
     </a>
 
   </div>
@@ -229,7 +255,7 @@
 
   <!-- HOW TO -->
   <div class="steps-card">
-    <div class="steps-title">⚙️ So richtest du es ein</div>
+    <div class="steps-title">So richtest du es ein</div>
 
     <div class="step">
       <div class="step-num">1</div>
@@ -263,21 +289,21 @@
   <div class="divider"></div>
 
   <!-- GAMES PREVIEW -->
-  <div class="section-label" style="margin-bottom: 16px;">10 Mini-Games</div>
+  <div class="section-label" style="margin-bottom:16px;">10 Mini-Games</div>
   <div class="games-preview">
-    <div class="game-pill">📸 Foto-Rätsel</div>
-    <div class="game-pill">🧠 Allgemeinwissen</div>
-    <div class="game-pill">🎂 Geburtstags-Quiz</div>
-    <div class="game-pill">⚡ Blitzreaktion</div>
-    <div class="game-pill">🎯 Wo war das?</div>
-    <div class="game-pill">🔤 Wörter-Staffel</div>
-    <div class="game-pill">🔢 Zahlen-Duell</div>
-    <div class="game-pill">🏃 Sport-Challenge</div>
-    <div class="game-pill">🤩 Emoji-Rätsel</div>
-    <div class="game-pill">✅ Wahr oder Falsch</div>
+    <div class="game-pill">Foto-Rätsel</div>
+    <div class="game-pill">Allgemeinwissen</div>
+    <div class="game-pill">Geburtstags-Quiz</div>
+    <div class="game-pill">Blitzreaktion</div>
+    <div class="game-pill">Wo war das?</div>
+    <div class="game-pill">Wörter-Staffel</div>
+    <div class="game-pill">Zahlen-Duell</div>
+    <div class="game-pill">Sport-Challenge</div>
+    <div class="game-pill">Emoji-Rätsel</div>
+    <div class="game-pill">Wahr oder Falsch</div>
   </div>
 
-  <div class="footer">SCHLAG DEN NARR — GEBURTSTAGS-EDITION</div>
+  <div class="footer">Schlag den Narr &mdash; Geburtstags-Edition</div>
 
 </div>
 </body>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Schlag den Narr 🎉</title>
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bangers&family=Fredoka+One&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --gold: #E8B400;
@@ -144,10 +144,10 @@
     font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.4rem;
     letter-spacing: 4px; color: var(--green);
   }
-  .game-tile-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
-  .game-tile-name { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 1.15rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-  .game-tile-type { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-  .game-tile-points { display: inline-block; background: var(--blue-dark); color: var(--gold); font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 0.8rem; padding: 3px 12px; border-radius: 2px; letter-spacing: 1px; }
+  .game-tile-icon { font-size: 1.3rem; margin-bottom: 6px; display: block; opacity: 0.7; }
+  .game-tile-name { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.1rem; color: #fff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px; }
+  .game-tile-type { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; }
+  .game-tile-points { display: inline-block; background: var(--blue-dark); color: var(--gold); font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 0.78rem; padding: 3px 12px; border-radius: 2px; letter-spacing: 2px; border: 1px solid rgba(0,85,204,0.3); }
   .game-tile-desc { font-size: 0.82rem; color: var(--text-dim); margin-top: 8px; line-height: 1.45; }
 
   .section-title { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: clamp(1.6rem, 4.5vw, 2.6rem); letter-spacing: 4px; text-align: center; text-transform: uppercase; margin-bottom: 6px; color: var(--text); }
@@ -400,20 +400,38 @@
   <div class="divider mt30"></div>
   <div class="card mw600 mt20">
     <div class="small-label tc mb10">Das Geburtstagskind</div>
-    <input class="input-field" id="birthday-name" placeholder="Wer hat heute Geburtstag? 🎂" maxlength="24">
+    <input class="input-field" id="birthday-name" placeholder="Wer hat heute Geburtstag?" maxlength="24">
     <div class="mt20 small-label tc mb10">Foto zum Erraten (optional)</div>
-    <input class="input-field" id="photo-upload-url" placeholder="Bild-URL eingeben (z.B. https://...)" type="url">
-    <div style="font-size:0.75rem; opacity:0.4; text-align:center; margin-top:6px;">Oder wir nutzen ein buntes Demo-Bild!</div>
+    <!-- File upload (no URL needed) -->
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <label id="photo-file-label" style="
+        flex:1; min-width:160px; padding:12px 16px;
+        background:rgba(255,255,255,0.05); border:1px dashed rgba(255,255,255,0.2);
+        border-radius:4px; cursor:pointer; text-align:center;
+        font-family:'Roboto Condensed',sans-serif; font-size:0.9rem;
+        color:rgba(255,255,255,0.5); letter-spacing:1px; transition:border-color 0.2s;
+      ">
+        Bild vom Gerät auswählen
+        <input type="file" id="photo-file-input" accept="image/*" style="display:none"
+          onchange="loadPhotoFile(this)">
+      </label>
+      <span style="color:rgba(255,255,255,0.25); font-size:0.8rem; letter-spacing:1px;">oder</span>
+      <input class="input-field" id="photo-upload-url" placeholder="Bild-URL (https://...)" type="url" style="flex:1; min-width:160px;" oninput="clearPhotoFile()">
+    </div>
+    <div id="photo-preview-wrap" style="display:none; margin-top:10px; text-align:center;">
+      <img id="photo-preview-img" src="" style="max-height:120px; max-width:100%; border-radius:4px; border:1px solid rgba(255,255,255,0.15);">
+      <div style="font-size:0.72rem; color:var(--green); letter-spacing:2px; margin-top:6px; text-transform:uppercase;">Bild geladen</div>
+    </div>
+    <div style="font-size:0.72rem; opacity:0.35; text-align:center; margin-top:6px; letter-spacing:1px;">Kein Bild? Kein Problem — wir nutzen ein Demo-Bild.</div>
     <button class="btn btn-primary w100 mt20" style="font-size:1.4rem; padding:18px;" onclick="startSetup()">
-      🎉 SPIEL STARTEN!
+      SPIEL STARTEN
     </button>
   </div>
 </div>
 
 <!-- ===== SCREEN: SETUP PLAYERS ===== -->
 <div class="screen" id="screen-setup">
-  <span style="font-size:3rem; text-align:center; margin-top:30px;">🎭</span>
-  <div class="section-title mt10" style="color: var(--cyan);">MITSPIELER WÄHLEN</div>
+  <div class="section-title mt20" style="color: var(--cyan);">MITSPIELER WÄHLEN</div>
   <div class="section-sub">Wer spielt heute mit?</div>
 
   <div class="card mw600" style="width:100%; max-width:600px;">
@@ -733,6 +751,33 @@ function showScreen(id) {
   window.scrollTo(0, 0);
 }
 
+// ── PHOTO FILE UPLOAD (no URL needed) ──
+function loadPhotoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.photoUrl = e.target.result; // base64 data URL
+    document.getElementById('photo-upload-url').value = '';
+    const preview = document.getElementById('photo-preview-img');
+    preview.src = e.target.result;
+    document.getElementById('photo-preview-wrap').style.display = 'block';
+    document.getElementById('photo-file-label').style.borderColor = 'var(--green)';
+    document.getElementById('photo-file-label').style.color = 'var(--green)';
+    document.getElementById('photo-file-label').firstChild.textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhotoFile() {
+  // URL field typed — clear file upload
+  state.photoUrl = '';
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+  document.getElementById('photo-file-input').value = '';
+  document.getElementById('photo-file-label').style.borderColor = '';
+  document.getElementById('photo-file-label').style.color = '';
+}
+
 // ═══════════════════════════════════════════════════
 //  SETUP
 // ═══════════════════════════════════════════════════
@@ -740,7 +785,10 @@ function startSetup() {
   const name = document.getElementById('birthday-name').value.trim();
   if (!name) { showToast('❗ Bitte Namen eingeben!'); return; }
   state.birthdayKid = name;
-  state.photoUrl = document.getElementById('photo-upload-url').value.trim();
+  // photoUrl is already set by loadPhotoFile() or use URL field as fallback
+  if (!state.photoUrl) {
+    state.photoUrl = document.getElementById('photo-upload-url').value.trim();
+  }
   document.getElementById('birthday-display').textContent = name;
   state.players = [];
   renderExtraPlayers();
@@ -1079,7 +1127,7 @@ function renderGameSelect() {
       <span class="game-tile-icon">${g.icon}</span>
       <div class="game-tile-name">${g.name}</div>
       <div class="game-tile-type">${g.type}</div>
-      <span class="game-tile-points">⭐ ${g.points} Punkte</span>
+      <span class="game-tile-points">${g.points} Punkte</span>
       <div class="game-tile-desc">${g.desc}</div>
     `;
     if (!played) div.onclick = () => selectGame(g);
@@ -2249,6 +2297,10 @@ function resetGame() {
   };
   document.getElementById('birthday-name').value = '';
   document.getElementById('photo-upload-url').value = '';
+  document.getElementById('photo-file-input').value = '';
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+  document.getElementById('photo-file-label').style.borderColor = '';
+  document.getElementById('photo-file-label').style.color = '';
   showScreen('welcome');
 }
 

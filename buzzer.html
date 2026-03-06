@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Schlag den Narr — Buzzer</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -37,9 +37,9 @@
     min-height: 100vh; padding: 32px 24px; gap: 16px;
   }
   #setup-screen .logo {
-    font-family: 'Oswald', sans-serif; font-weight: 700;
-    font-size: 2rem; letter-spacing: 5px; color: var(--gold); text-transform: uppercase;
-    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem; letter-spacing: 8px; color: var(--gold); text-transform: uppercase;
+    text-align: center; text-shadow: 0 0 40px rgba(232,180,0,0.25);
   }
   #setup-screen .sub {
     font-size: 0.85rem; color: var(--text-dim); letter-spacing: 2px; text-align: center;
@@ -225,15 +225,15 @@
 
 <!-- ── SETUP ── -->
 <div id="setup-screen">
-  <div class="logo">🤡 Schlag den Narr</div>
-  <div class="sub">SPIELER-BUZZER</div>
+  <div class="logo">Schlag den Narr</div>
+  <div class="sub">Spieler-Buzzer</div>
 
   <input type="text" class="name-input" id="player-name-input"
     placeholder="Dein Name..."
     maxlength="20"
     onkeydown="if(event.key==='Enter') connect()">
 
-  <button class="connect-btn" onclick="connect()">🎮 Verbinden</button>
+  <button class="connect-btn" onclick="connect()">Verbinden</button>
 
   <div class="setup-hint">
     Name eingeben — du wirst automatisch dem richtigen Duell zugewiesen wenn du dran bist.
@@ -268,8 +268,8 @@
     <button id="buzz-btn" class="watching"
       ontouchstart="triggerBuzz(event)"
       onclick="triggerBuzz(event)">
-      <span class="buzz-main" id="buzz-main-text">👀</span>
-      <span class="buzz-sub" id="buzz-sub-text">Warte auf dein Duell...</span>
+      <span class="buzz-main" id="buzz-main-text">· · ·</span>
+      <span class="buzz-sub" id="buzz-sub-text">Warte auf dein Duell</span>
     </button>
   </div>
 
@@ -334,7 +334,7 @@ function updateBuzzButton() {
     subText.textContent = myName;
   } else {
     btn.className = 'watching';
-    mainText.textContent = '👀';
+    mainText.textContent = '· · ·';
     subText.textContent = 'Nicht dein Duell';
   }
 }
