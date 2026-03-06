@@ -590,6 +590,7 @@ channel
     if (event === 'SUBSCRIBED') {
       status.textContent = '● VERBUNDEN — LIVE';
       status.className = 'connected';
+      channel.send({ type: 'broadcast', event: 'request_state', payload: {} });
     } else {
       status.textContent = '● GETRENNT';
       status.className = 'disconnected';

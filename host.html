@@ -510,17 +510,51 @@ function initRealtime() {
   // Listen for buzzer presses from player devices
   realtimeChannel.on('broadcast', { event: 'buzz' }, ({ payload }) => {
     const { side, playerName: pName } = payload;
-    // Dispatch to whatever buzz handler is currently active
     if (typeof window.__activeBuzzHandler === 'function') {
       window.__activeBuzzHandler(side, pName);
     }
   });
 
+  // Late-joining clients request current state
+  realtimeChannel.on('broadcast', { event: 'request_state' }, () => {
+    const phase = state.currentPhase;
+    if (phase !== 'waiting' && state.currentGame) {
+      broadcast('game_state', buildBroadcastState({
+        phase,
+        gameId: state.currentGame.id,
+        gameName: state.currentGame.name,
+        gameIcon: state.currentGame.icon,
+      }));
+      if (state.lastDisplay) broadcast('display', state.lastDisplay);
+    } else {
+      broadcast('game_state', {
+        phase: 'waiting',
+        allScores: state.allScores || {},
+        allPlayers: allPlayersList(),
+        playerLeft: state.currentPlayers.left,
+        playerRight: state.currentPlayers.right,
+      });
+    }
+  });
+
   realtimeChannel.subscribe();
+
+  // Heartbeat every 5s — keeps late joiners in sync
+  setInterval(() => {
+    if (state.currentPhase !== 'waiting' && state.currentGame) {
+      broadcast('game_state', buildBroadcastState({
+        phase: state.currentPhase,
+        gameId: state.currentGame.id,
+        gameName: state.currentGame.name,
+        gameIcon: state.currentGame.icon,
+      }));
+    }
+  }, 5000);
 }
 
 function broadcast(event, payload) {
   if (!realtimeChannel) return;
+  if (event === 'display') state.lastDisplay = payload;
   realtimeChannel.send({ type: 'broadcast', event, payload });
 }
 
@@ -543,6 +577,8 @@ let state = {
   players: [],       // all challengers (not birthday kid)
   allScores: {},     // name -> score (birthday kid + all players)
   currentMatchup: { left: 0, right: 1 }, // indices into [birthdayKid, ...players]
+  currentPhase: 'waiting',  // 'waiting' | 'playing' | 'result'
+  lastDisplay: null,         // last display event payload, for late-join sync
   // Custom questions
   customQuestions: {
     quiz: [],        // {q, opts:['A','B','C','D'], a:0}
@@ -1053,6 +1089,8 @@ function launchGame(game) {
   const rightIdx = state.playedGames.length % state.players.length;
   state.currentPlayers.right = state.players[rightIdx];
   state.challenger = state.currentPlayers.right;
+  state.currentPhase = 'playing';
+  state.lastDisplay = null;
   showScreen('game');
   broadcast('game_state', buildBroadcastState({
     phase: 'playing',
@@ -2074,6 +2112,7 @@ function playTrueFalse() {
 // ═══════════════════════════════════════════════════
 function showResult(title, pts, winSide, maxPts, extra) {
   state.playedGames.push(state.currentGame.id);
+  state.currentPhase = 'result';
   window.__activeBuzzHandler = null; // clear buzz handler
   broadcast('game_state', buildBroadcastState({
     phase: 'result',
@@ -2122,6 +2161,8 @@ function showResult(title, pts, winSide, maxPts, extra) {
 }
 
 function backToSelect() {
+  state.currentPhase = 'waiting';
+  state.lastDisplay = null;
   renderGameSelect();
   showScreen('gameselect');
 }
@@ -2173,6 +2214,7 @@ function resetGame() {
     playedGames: [], maxGames: 5, currentGame: null,
     currentPlayers: { left: '', right: '' },
     players: [], allScores: {}, currentMatchup: { leftIdx: 0, rightIdx: 1 },
+    currentPhase: 'waiting', lastDisplay: null,
     customQuestions: {
       quiz: [], birthday: [], trueFalse: [], numbers: [],
       emoji: [], words: [], physical: []

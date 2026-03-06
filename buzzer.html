@@ -385,10 +385,13 @@ function initRealtime() {
   channel.on('broadcast', { event: 'game_state' }, ({ payload }) => {
     const { gameName, gameIcon, allScores, allPlayers, phase, resultTitle, playerLeft, playerRight } = payload;
 
-    // Auto-assign side based on current matchup
+    // Auto-assign side — case-insensitive name match
     const prevSide = mySide;
-    if (playerLeft === myName) mySide = 'left';
-    else if (playerRight === myName) mySide = 'right';
+    const pL = (playerLeft  || '').trim().toLowerCase();
+    const pR = (playerRight || '').trim().toLowerCase();
+    const me = myName.trim().toLowerCase();
+    if (pL && pL === me) mySide = 'left';
+    else if (pR && pR === me) mySide = 'right';
     else mySide = null;
 
     if (mySide !== prevSide) {
@@ -470,6 +473,8 @@ function initRealtime() {
         statusBar.textContent = '● VERBUNDEN';
         statusBar.className = 'connected';
         dot.classList.add('on');
+        // Request current state from host (for late joiners)
+        channel.send({ type: 'broadcast', event: 'request_state', payload: {} });
       } else {
         statusBar.textContent = '● GETRENNT — Seite neu laden';
         statusBar.className = '';
