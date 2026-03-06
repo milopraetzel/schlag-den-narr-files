@@ -175,6 +175,22 @@
   @keyframes buzzFlash { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.6); } }
   .buzz-name { font-family: 'Roboto Condensed', sans-serif; font-weight: 400; font-size: 1rem; opacity: 0.85; letter-spacing: 0; }
 
+  /* ── FLOATING BUZZ RELEASE BUTTON ── */
+  #buzz-release-btn {
+    display: none;
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    z-index: 999;
+    padding: 16px 36px;
+    background: var(--green); color: #fff;
+    border: none; border-radius: 8px; border-bottom: 4px solid #008833;
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase;
+    cursor: pointer; box-shadow: 0 8px 40px rgba(0,187,85,0.45);
+    transition: filter 0.15s;
+  }
+  #buzz-release-btn:hover { filter: brightness(1.15); }
+  #buzz-release-btn.visible { display: block; }
+
   .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 600px; margin: 16px auto; }
   .quiz-option {
     background: var(--panel); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;
@@ -357,6 +373,9 @@
 <div class="stars" id="stars"></div>
 <div class="toast" id="toast"></div>
 
+<!-- FLOATING BUZZ RELEASE -->
+<button id="buzz-release-btn" onclick="releaseBuzz()">🔓 Buzzer freigeben</button>
+
 <!-- BACK CONFIRM MODAL -->
 <div id="back-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
   <div style="background:#1a1a2e; border:2px solid var(--gold); border-radius:16px; padding:32px 28px; max-width:320px; width:90%; text-align:center;">
@@ -513,6 +532,9 @@ function initRealtime() {
     if (typeof window.__activeBuzzHandler === 'function') {
       window.__activeBuzzHandler(side, pName);
     }
+    // Lock all phone buzzers and show release button on host
+    broadcast('buzz_locked', { side, playerName: pName });
+    document.getElementById('buzz-release-btn').classList.add('visible');
   });
 
   // Late-joining clients request current state
@@ -556,6 +578,11 @@ function broadcast(event, payload) {
   if (!realtimeChannel) return;
   if (event === 'display') state.lastDisplay = payload;
   realtimeChannel.send({ type: 'broadcast', event, payload });
+}
+
+function releaseBuzz() {
+  broadcast('buzz_reset', {});
+  document.getElementById('buzz-release-btn').classList.remove('visible');
 }
 
 // Call after page load

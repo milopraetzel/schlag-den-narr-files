@@ -349,19 +349,14 @@ function triggerBuzz(e) {
   buzzBlocked = true;
   const btn = document.getElementById('buzz-btn');
   btn.classList.add('buzzed', 'disabled');
-  document.getElementById('game-label-small').textContent = '⚡ GEDRÜCKT!';
+  document.getElementById('game-label-small').textContent = '⚡ DU WARST SCHNELLER!';
 
   channel.send({
     type: 'broadcast',
     event: 'buzz',
     payload: { side: mySide, playerName: myName }
   });
-
-  setTimeout(() => {
-    btn.classList.remove('buzzed', 'disabled');
-    buzzBlocked = false;
-    document.getElementById('game-label-small').textContent = 'AKTIV';
-  }, 3000);
+  // Stay locked — host will release with buzz_reset
 }
 
 // ── SCORES ──
@@ -442,27 +437,40 @@ function initRealtime() {
     if (type === 'photo_blur')     showContent('FOTO-RÄTSEL', 'Wer ist auf dem Bild? Drücke wenn du es weißt!');
 
     if (type === 'buzz_flash') {
-      // Another player buzzed — block if it's not me
+      // Another player buzzed — hide button until host releases
       if (payload.side !== mySide) {
         buzzBlocked = true;
-        document.getElementById('buzz-btn').classList.add('disabled');
+        document.getElementById('buzz-btn-area').style.display = 'none';
         document.getElementById('game-label-small').textContent = (payload.name || 'Gegner') + ' war schneller!';
       }
     }
   });
 
-  // Someone else buzzed physically (from host buzzer area)
+  // Someone buzzed — lock the loser's buzzer until host releases
   channel.on('broadcast', { event: 'buzz' }, ({ payload }) => {
     if (payload.side !== mySide) {
       buzzBlocked = true;
-      document.getElementById('buzz-btn').classList.add('disabled');
+      document.getElementById('buzz-btn-area').style.display = 'none';
       document.getElementById('game-label-small').textContent = (payload.playerName || 'Gegner') + ' war schneller!';
-      setTimeout(() => {
-        buzzBlocked = false;
-        document.getElementById('buzz-btn').classList.remove('disabled');
-        document.getElementById('game-label-small').textContent = 'AKTIV';
-      }, 3000);
     }
+  });
+
+  // host.html listens to buzz from phone and re-broadcasts buzz_locked
+  channel.on('broadcast', { event: 'buzz_locked' }, ({ payload }) => {
+    if (payload.side !== mySide) {
+      buzzBlocked = true;
+      document.getElementById('buzz-btn-area').style.display = 'none';
+      document.getElementById('game-label-small').textContent = (payload.playerName || 'Gegner') + ' war schneller!';
+    }
+  });
+
+  // Moderator releases — restore buzzer for everyone
+  channel.on('broadcast', { event: 'buzz_reset' }, () => {
+    buzzBlocked = false;
+    document.getElementById('buzz-btn-area').style.display = 'flex';
+    const btn = document.getElementById('buzz-btn');
+    btn.classList.remove('buzzed', 'disabled');
+    document.getElementById('game-label-small').textContent = mySide ? 'AKTIV' : '';
   });
 
   channel
