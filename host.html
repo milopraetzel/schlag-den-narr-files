@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Schlag den Narr 🎉</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --gold: #E8B400;
@@ -312,6 +312,43 @@
   }
 
   .stars { display: none; }
+
+  /* ── PHOTO REVEAL ── */
+  .photo-container {
+    width: 100%; max-width: 480px; aspect-ratio: 1;
+    border-radius: 8px; overflow: hidden;
+    border: 2px solid var(--border);
+    position: relative; background: var(--panel2);
+    margin: 12px auto;
+  }
+  .photo-hint {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 1rem; color: var(--cyan);
+    text-align: center; padding: 10px 16px;
+    background: rgba(0,170,221,0.07);
+    border-radius: 4px; border: 1px solid rgba(0,170,221,0.2);
+    margin: 10px 0; letter-spacing: 1px;
+    max-width: 480px; width: 100%;
+  }
+  .photo-img {
+    width: 100%; height: 100%; object-fit: cover;
+    position: absolute; inset: 0;
+    transition: filter 0.8s ease;
+  }
+  .blur-progress-bar {
+    width: 100%; max-width: 480px; height: 6px;
+    background: rgba(255,255,255,0.08); border-radius: 2px;
+    overflow: hidden; margin: 8px auto;
+  }
+  .blur-progress-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--gold), #FF6600);
+    transition: width 0.9s linear;
+  }
+
+  /* ── GAME COUNT BUTTONS ── */
+  .game-count-btn { transition: all 0.15s; }
+  .game-count-btn.active { background: var(--blue) !important; border-color: var(--blue) !important; color: #fff !important; }
 </style>
 </head>
 <body>
@@ -380,12 +417,12 @@
   <div class="divider"></div>
   <div class="section-sub">Wie viele Spiele heute?</div>
   <div class="flex-row">
-    <button class="btn btn-secondary btn-small" onclick="setGameCount(3)">3 Spiele</button>
-    <button class="btn btn-secondary btn-small" onclick="setGameCount(5)">5 Spiele</button>
-    <button class="btn btn-secondary btn-small" onclick="setGameCount(7)">7 Spiele</button>
-    <button class="btn btn-secondary btn-small" onclick="setGameCount(10)">ALLE 10</button>
+    <button class="btn btn-secondary btn-small game-count-btn" id="gcbtn-3" onclick="setGameCount(3)">3 Spiele</button>
+    <button class="btn btn-secondary btn-small game-count-btn active" id="gcbtn-5" onclick="setGameCount(5)">5 Spiele</button>
+    <button class="btn btn-secondary btn-small game-count-btn" id="gcbtn-7" onclick="setGameCount(7)">7 Spiele</button>
+    <button class="btn btn-secondary btn-small game-count-btn" id="gcbtn-10" onclick="setGameCount(10)">ALLE 10</button>
   </div>
-  <div id="game-count-display" style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:var(--gold); margin-top:12px; text-align:center;"></div>
+  <div id="game-count-display" style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:var(--gold); margin-top:12px; text-align:center;">✓ 5 Spiele gewählt</div>
 
   <div class="divider"></div>
   <button class="btn btn-secondary w100 mw600" style="font-size:1rem; padding:14px;" onclick="goToCustomize()">
@@ -682,6 +719,9 @@ function removePlayer(i) {
 function setGameCount(n) {
   state.maxGames = n;
   document.getElementById('game-count-display').textContent = `✓ ${n} Spiele gewählt`;
+  document.querySelectorAll('.game-count-btn').forEach(btn => btn.classList.remove('active'));
+  const active = document.getElementById('gcbtn-' + n);
+  if (active) active.classList.add('active');
   showToast(`${n} Spiele – auf geht's!`);
 }
 
