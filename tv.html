@@ -6,6 +6,7 @@
 <title>Schlag den Narr — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
 <style>
   :root {
     --gold: #E8B400;
@@ -101,6 +102,26 @@
   #waiting {
     text-align: center;
   }
+  /* QR Code section */
+  #qr-section {
+    margin-top: 40px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  #qr-section .qr-label {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 400;
+    font-size: 0.68rem; letter-spacing: 5px; color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  #qr-code canvas, #qr-code img {
+    border-radius: 6px;
+    border: 6px solid rgba(255,255,255,0.06);
+    display: block;
+  }
+  #qr-url {
+    font-family: 'Roboto Condensed', sans-serif; font-size: 0.72rem;
+    color: var(--text-dim); letter-spacing: 2px; opacity: 0.5;
+  }
+
   .waiting-ring {
     width: 80px; height: 80px; border-radius: 50%;
     border: 3px solid rgba(232,180,0,0.15);
@@ -346,6 +367,11 @@
       <div class="waiting-ring"></div>
       <h1>BEREIT</h1>
       <p>Warte auf den Start</p>
+      <div id="qr-section">
+        <div class="qr-label">Buzzer öffnen — Handy scannen</div>
+        <div id="qr-code"></div>
+        <div id="qr-url">milopraetzel.github.io/schlag-den-narr-files/buzzer.html</div>
+      </div>
     </div>
 
     <!-- Photo reveal -->
@@ -626,6 +652,18 @@ channel
     }
   })
   .subscribe();
+
+// ── QR Code ──
+window.addEventListener('load', () => {
+  new QRCode(document.getElementById('qr-code'), {
+    text: 'https://milopraetzel.github.io/schlag-den-narr-files/buzzer.html',
+    width: 180,
+    height: 180,
+    colorDark: '#ffffff',
+    colorLight: '#06090F',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+});
 </script>
 </body>
 </html>

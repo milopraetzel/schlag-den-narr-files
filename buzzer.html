@@ -339,12 +339,56 @@ function updateBuzzButton() {
   }
 }
 
+// ── SOUNDS (Web Audio API) ──
+function playBuzzSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Layer 1: harsh saw buzz
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(200, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.22);
+    gain.gain.setValueAtTime(0.55, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.45);
+    // Layer 2: low thud
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(80, ctx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
+    gain2.gain.setValueAtTime(0.6, ctx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 0.2);
+  } catch(e) {}
+}
+
+function playLockedSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(300, ctx.currentTime);
+    osc.frequency.setValueAtTime(220, ctx.currentTime + 0.08);
+    osc.frequency.setValueAtTime(180, ctx.currentTime + 0.16);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+  } catch(e) {}
+}
+
 // ── TRIGGER BUZZ ──
 function triggerBuzz(e) {
   if (e) e.preventDefault();
   if (!mySide || buzzBlocked || !channel) return;
 
   if (navigator.vibrate) navigator.vibrate([80, 30, 80]);
+  playBuzzSound();
 
   buzzBlocked = true;
   const btn = document.getElementById('buzz-btn');
@@ -450,6 +494,7 @@ function initRealtime() {
   channel.on('broadcast', { event: 'buzz' }, ({ payload }) => {
     if (payload.side !== mySide) {
       buzzBlocked = true;
+      playLockedSound();
       document.getElementById('buzz-btn-area').style.display = 'none';
       document.getElementById('game-label-small').textContent = (payload.playerName || 'Gegner') + ' war schneller!';
     }
@@ -459,6 +504,7 @@ function initRealtime() {
   channel.on('broadcast', { event: 'buzz_locked' }, ({ payload }) => {
     if (payload.side !== mySide) {
       buzzBlocked = true;
+      playLockedSound();
       document.getElementById('buzz-btn-area').style.display = 'none';
       document.getElementById('game-label-small').textContent = (payload.playerName || 'Gegner') + ' war schneller!';
     }
