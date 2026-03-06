@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schlag den Narr 🎉</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #E8B400;
+    --gold-light: #FFD700;
+    --blue: #0055CC;
+    --blue-light: #0077FF;
+    --blue-dark: #003388;
+    --red: #CC1100;
+    --red-light: #EE2200;
+    --dark: #080C14;
+    --panel: #0D1422;
+    --panel2: #111926;
+    --border: rgba(255,255,255,0.12);
+    --text: #E8EAF0;
+    --text-dim: rgba(232,234,240,0.55);
+    --green: #00BB55;
+    --cyan: #00AADD;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 0%, rgba(0,55,150,0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 40% at 50% 100%, rgba(0,30,80,0.4) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px; top: -20px;
+    animation: confettiFall linear forwards;
+    pointer-events: none; z-index: 999; border-radius: 2px;
+  }
+  @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+  .screen { display: none; position: relative; z-index: 1; min-height: 100vh; padding: 20px; animation: fadeIn 0.3s ease; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .logo {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: clamp(2.8rem, 9vw, 6.5rem); letter-spacing: 6px;
+    text-align: center; line-height: 1; color: var(--gold);
+    text-transform: uppercase; text-shadow: 0 0 60px rgba(232,180,0,0.4), 0 4px 0 rgba(0,0,0,0.8);
+  }
+  .logo-sub {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 400;
+    font-size: clamp(0.8rem, 2vw, 1.1rem); color: var(--text-dim);
+    letter-spacing: 8px; text-align: center; text-transform: uppercase; margin-top: 6px;
+  }
+  .jester-icon {
+    font-size: clamp(2.8rem, 7vw, 4rem); display: block; text-align: center; margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px rgba(232,180,0,0.3));
+  }
+  @keyframes wiggle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+  .studio-line {
+    width: 100%; max-width: 600px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 28px auto; opacity: 0.6;
+  }
+
+  .btn {
+    font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 1.1rem;
+    padding: 14px 36px; border: none; border-radius: 4px; cursor: pointer;
+    position: relative; transition: all 0.15s; letter-spacing: 2px; text-transform: uppercase;
+  }
+  .btn:hover { filter: brightness(1.15); }
+  .btn:active { transform: scale(0.97); filter: brightness(0.95); }
+  .btn-primary { background: var(--blue); color: #fff; border-bottom: 3px solid var(--blue-dark); box-shadow: 0 4px 20px rgba(0,85,204,0.35); }
+  .btn-secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-bottom: 3px solid rgba(0,0,0,0.4); }
+  .btn-gold { background: var(--gold); color: #0D0D0D; border-bottom: 3px solid #A07800; box-shadow: 0 4px 20px rgba(232,180,0,0.35); font-weight: 700; }
+  .btn-cyan { background: var(--cyan); color: #fff; border-bottom: 3px solid #007799; box-shadow: 0 4px 16px rgba(0,170,221,0.3); }
+  .btn-small { font-size: 0.85rem; padding: 9px 20px; letter-spacing: 1px; }
+  .btn-huge { font-size: 1.5rem; padding: 20px 56px; letter-spacing: 3px; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 24px; position: relative;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-light), var(--gold));
+    border-radius: 6px 6px 0 0;
+  }
+
+  .input-field {
+    background: #0A0F1A; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px;
+    padding: 12px 16px; color: var(--text); font-family: 'Roboto', sans-serif;
+    font-size: 1rem; font-weight: 500; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+  }
+  .input-field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(232,180,0,0.12); }
+  .input-field::placeholder { color: rgba(255,255,255,0.25); }
+
+  .scoreboard { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 16px 0; }
+  .score-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+    padding: 14px 22px; text-align: center; min-width: 130px; transition: all 0.3s; position: relative;
+  }
+  .score-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--blue); border-radius: 4px 4px 0 0;
+  }
+  .score-card.active-player { border-color: var(--gold); }
+  .score-card.active-player::before { background: var(--gold); }
+  .score-card.active-player::after {
+    content: '▶'; position: absolute; top: 8px; right: 8px;
+    color: var(--gold); font-size: 0.7rem; animation: blink 1s infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+  .score-name { font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 1rem; color: var(--gold); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .score-value { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 2.2rem; color: #fff; letter-spacing: 1px; }
+  .score-label { font-size: 0.7rem; opacity: 0.4; letter-spacing: 2px; text-transform: uppercase; }
+
+  .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; width: 100%; max-width: 900px; }
+  .game-tile {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+    padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+    border-left: 4px solid transparent;
+  }
+  .game-tile:hover { background: var(--panel2); border-color: var(--gold); border-left-color: var(--gold); }
+  .game-tile.played { opacity: 0.4; pointer-events: none; }
+  .game-tile.played::after {
+    content: '✓ GESPIELT'; position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.4rem;
+    letter-spacing: 4px; color: var(--green);
+  }
+  .game-tile-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+  .game-tile-name { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 1.15rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+  .game-tile-type { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+  .game-tile-points { display: inline-block; background: var(--blue-dark); color: var(--gold); font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 0.8rem; padding: 3px 12px; border-radius: 2px; letter-spacing: 1px; }
+  .game-tile-desc { font-size: 0.82rem; color: var(--text-dim); margin-top: 8px; line-height: 1.45; }
+
+  .section-title { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: clamp(1.6rem, 4.5vw, 2.6rem); letter-spacing: 4px; text-align: center; text-transform: uppercase; margin-bottom: 6px; color: var(--text); }
+  .section-sub { font-size: 0.88rem; color: var(--text-dim); text-align: center; margin-bottom: 24px; letter-spacing: 1px; }
+
+  .divider { width: 100%; max-width: 500px; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 20px auto; }
+
+  .player-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 700px; }
+  .player-select-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 20px; text-align: center; }
+  .player-label { font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 0.78rem; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+
+  .buzz-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 600px; margin: 20px auto; }
+  .buzz-btn {
+    padding: 28px 10px; border: none; border-radius: 6px; cursor: pointer;
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.5rem;
+    letter-spacing: 2px; text-transform: uppercase; color: #fff;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: all 0.1s; position: relative; overflow: hidden;
+  }
+  .buzz-btn::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: rgba(0,0,0,0.3); border-radius: 0 0 6px 6px; }
+  .buzz-btn.left { background: linear-gradient(160deg, #CC1100, #990000); box-shadow: 0 6px 30px rgba(200,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1); }
+  .buzz-btn.right { background: linear-gradient(160deg, #0055CC, #003388); box-shadow: 0 6px 30px rgba(0,85,204,0.35), inset 0 1px 0 rgba(255,255,255,0.1); }
+  .buzz-btn:active { transform: scale(0.96) translateY(2px); }
+  .buzz-btn.buzzing { animation: buzzFlash 0.4s ease-out; }
+  @keyframes buzzFlash { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.6); } }
+  .buzz-name { font-family: 'Roboto Condensed', sans-serif; font-weight: 400; font-size: 1rem; opacity: 0.85; letter-spacing: 0; }
+
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 600px; margin: 16px auto; }
+  .quiz-option {
+    background: var(--panel); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;
+    padding: 16px; text-align: left; font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 400; font-size: 1rem; color: var(--text); cursor: pointer; transition: all 0.15s;
+    border-left: 3px solid var(--blue);
+  }
+  .quiz-option:hover { background: var(--panel2); border-color: var(--gold); border-left-color: var(--gold); }
+  .quiz-option.correct { border-color: var(--green); border-left-color: var(--green); background: rgba(0,187,85,0.1); color: #6EFFA0; }
+  .quiz-option.wrong { border-color: var(--red); border-left-color: var(--red); background: rgba(200,0,0,0.1); color: #FF7766; }
+
+  .quiz-question { font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: clamp(1.1rem, 3vw, 1.6rem); text-align: center; line-height: 1.35; padding: 10px 0; color: #fff; }
+
+  .sport-game-area { width: 100%; max-width: 600px; text-align: center; }
+  .countdown-big {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: clamp(5rem, 20vw, 10rem); letter-spacing: 6px;
+    color: var(--gold); line-height: 1; text-shadow: 0 0 60px rgba(232,180,0,0.5);
+    animation: countPulse 1s ease-in-out infinite;
+  }
+  @keyframes countPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+  .reaction-btn {
+    width: 200px; height: 200px; border-radius: 50%; border: none; cursor: pointer;
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.6rem; letter-spacing: 2px;
+    color: #fff; background: radial-gradient(circle at 40% 35%, #EE6600, #CC3300, #990000);
+    box-shadow: 0 8px 40px rgba(200,50,0,0.5), inset 0 4px 12px rgba(255,255,255,0.15);
+    transition: all 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; margin: 30px auto;
+  }
+  .reaction-btn:active { transform: scale(0.93); }
+
+  .memory-grid-area {
+    position: relative; width: 100%; max-width: 500px; aspect-ratio: 1;
+    background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden;
+    border: 1px solid var(--border); margin: 20px auto; cursor: crosshair;
+  }
+  .memory-marker {
+    position: absolute; width: 28px; height: 28px; border-radius: 50%; background: var(--gold);
+    transform: translate(-50%, -50%); pointer-events: none; animation: markerPop 0.3s ease-out;
+    border: 3px solid #fff; box-shadow: 0 0 16px rgba(232,180,0,0.7);
+    display: flex; align-items: center; justify-content: center; font-weight: 900; color: #333; font-size: 0.7rem;
+  }
+  .correct-marker {
+    position: absolute; width: 22px; height: 22px; border-radius: 50%; background: var(--green);
+    transform: translate(-50%, -50%); pointer-events: none; border: 3px solid #fff; box-shadow: 0 0 14px rgba(0,187,85,0.7);
+  }
+  @keyframes markerPop { 0% { transform: translate(-50%, -50%) scale(0); } 70% { transform: translate(-50%, -50%) scale(1.2); } 100% { transform: translate(-50%, -50%) scale(1); } }
+
+  .points-popup {
+    position: fixed; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 2.5rem;
+    letter-spacing: 2px; pointer-events: none; z-index: 1000;
+    animation: pointsFloat 1.4s ease-out forwards; text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+  }
+  @keyframes pointsFloat { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-130px) scale(1.3); opacity: 0; } }
+
+  .timer-bar-wrap { width: 100%; max-width: 600px; height: 8px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin: 12px auto; }
+  .timer-bar-fill { height: 100%; border-radius: 2px; transition: width 0.1s linear; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+  .timer-bar-fill.urgent { background: linear-gradient(90deg, #CC6600, var(--red)); animation: urgentPulse 0.6s infinite; }
+  @keyframes urgentPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  .round-badge {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--blue-dark);
+    color: var(--gold); font-family: 'Oswald', sans-serif; font-weight: 600;
+    font-size: 0.9rem; padding: 6px 18px; border-radius: 2px; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  .winner-crown { font-size: 4rem; display: block; text-align: center; margin-bottom: 12px; }
+  .winner-name {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: clamp(2.5rem, 9vw, 5.5rem); letter-spacing: 4px;
+    color: var(--gold); text-align: center; text-shadow: 0 0 60px rgba(232,180,0,0.5);
+    text-transform: uppercase;
+  }
+  .winner-text { font-family: 'Roboto Condensed', sans-serif; font-weight: 400; font-size: 1.2rem; color: var(--text-dim); text-align: center; margin: 10px 0; letter-spacing: 1px; }
+
+  .toast {
+    position: fixed; top: 20px; left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--panel); border: 1px solid var(--gold); border-left: 4px solid var(--gold);
+    color: var(--text); font-family: 'Roboto Condensed', sans-serif; font-weight: 700;
+    font-size: 1rem; letter-spacing: 1px; padding: 12px 24px; border-radius: 4px; z-index: 2000;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap; box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .scroll-area { width: 100%; max-height: 70vh; overflow-y: auto; padding-right: 4px; }
+  .scroll-area::-webkit-scrollbar { width: 3px; }
+  .scroll-area::-webkit-scrollbar-track { background: transparent; }
+  .scroll-area::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 2px; }
+
+  .w100 { width: 100%; }
+  .mw600 { max-width: 600px; width: 100%; }
+  .mw900 { max-width: 900px; width: 100%; }
+  .tc { text-align: center; }
+  .mt10 { margin-top: 10px; }
+  .mt20 { margin-top: 20px; }
+  .mt30 { margin-top: 30px; }
+  .mb10 { margin-bottom: 10px; }
+  .mb20 { margin-bottom: 20px; }
+  .flex-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .highlight-text { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--gold); }
+  .small-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+  .result-msg { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 1.6rem; letter-spacing: 1px; text-align: center; padding: 18px; border-radius: 4px; }
+  .result-msg.win { color: var(--green); background: rgba(0,187,85,0.08); border: 1px solid rgba(0,187,85,0.3); border-left: 4px solid var(--green); }
+  .result-msg.lose { color: #FF7766; background: rgba(200,0,0,0.08); border: 1px solid rgba(200,0,0,0.3); border-left: 4px solid var(--red); }
+  .result-msg.draw { color: var(--gold); background: rgba(232,180,0,0.08); border: 1px solid rgba(232,180,0,0.3); border-left: 4px solid var(--gold); }
+
+  .sport-choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 500px; margin: 20px auto; }
+  .sport-choice {
+    padding: 18px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--panel);
+    cursor: pointer; font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 1rem;
+    color: var(--text); text-align: center; transition: all 0.15s; display: flex; flex-direction: column;
+    align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; border-left: 3px solid var(--blue);
+  }
+  .sport-choice .icon { font-size: 1.8rem; }
+  .sport-choice:hover { border-color: var(--gold); border-left-color: var(--gold); background: var(--panel2); }
+  .sport-choice.chosen { border-color: var(--gold); border-left-color: var(--gold); background: rgba(232,180,0,0.08); color: var(--gold); }
+
+  .show-target-msg {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 1rem;
+    color: var(--cyan); text-align: center; padding: 10px; background: rgba(0,170,221,0.07);
+    border-radius: 4px; border: 1px solid rgba(0,170,221,0.2); margin: 10px 0; letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.92rem; }
+  .result-row:last-child { border-bottom: none; }
+
+  .demo-image {
+    width: 100%; height: 100%; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #080C20, #101830, #0C1810);
+    font-size: 5rem; transition: filter 1.5s ease;
+  }
+
+  .stars { display: none; }
+</style>
+</head>
+<body>
+
+<!-- STARS -->
+<div class="stars" id="stars"></div>
+<div class="toast" id="toast"></div>
+
+<!-- BACK CONFIRM MODAL -->
+<div id="back-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#1a1a2e; border:2px solid var(--gold); border-radius:16px; padding:32px 28px; max-width:320px; width:90%; text-align:center;">
+    <div style="font-size:2rem; margin-bottom:12px;">⚠️</div>
+    <div style="font-family:'Bangers',cursive; font-size:1.6rem; color:var(--gold); margin-bottom:10px;">Spiel abbrechen?</div>
+    <div style="color:rgba(255,255,255,0.7); margin-bottom:24px; font-size:0.95rem;">Zurück zur Spielauswahl — keine Punkte werden vergeben.</div>
+    <div style="display:flex; gap:12px; justify-content:center;">
+      <button class="btn btn-secondary" onclick="document.getElementById('back-modal').style.display='none'" style="flex:1;">Weiterspielen</button>
+      <button class="btn btn-primary" onclick="document.getElementById('back-modal').style.display='none'; backToSelect();" style="flex:1;">Ja, zurück</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: WELCOME ===== -->
+<div class="screen active" id="screen-welcome">
+  <div style="margin-top: 40px; text-align: center;">
+    <span class="jester-icon">🤡</span>
+    <div class="logo">SCHLAG</div>
+    <div class="logo">DEN NARR</div>
+    <div class="logo-sub">⭐ Die Geburtstags-Show ⭐</div>
+  </div>
+  <div class="divider mt30"></div>
+  <div class="card mw600 mt20">
+    <div class="small-label tc mb10">Das Geburtstagskind</div>
+    <input class="input-field" id="birthday-name" placeholder="Wer hat heute Geburtstag? 🎂" maxlength="24">
+    <div class="mt20 small-label tc mb10">Foto zum Erraten (optional)</div>
+    <input class="input-field" id="photo-upload-url" placeholder="Bild-URL eingeben (z.B. https://...)" type="url">
+    <div style="font-size:0.75rem; opacity:0.4; text-align:center; margin-top:6px;">Oder wir nutzen ein buntes Demo-Bild!</div>
+    <button class="btn btn-primary w100 mt20" style="font-size:1.4rem; padding:18px;" onclick="startSetup()">
+      🎉 SPIEL STARTEN!
+    </button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: SETUP PLAYERS ===== -->
+<div class="screen" id="screen-setup">
+  <span style="font-size:3rem; text-align:center; margin-top:30px;">🎭</span>
+  <div class="section-title mt10" style="color: var(--cyan);">MITSPIELER WÄHLEN</div>
+  <div class="section-sub">Wer spielt heute mit?</div>
+
+  <div class="card mw600" style="width:100%; max-width:600px;">
+    <!-- Birthday kid row -->
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-size:1.5rem;">⭐</div>
+      <div style="flex:1; font-family:'Fredoka One',cursive; color:var(--gold);" id="birthday-display">-</div>
+      <div style="font-size:0.75rem; opacity:0.4;">Geburtstagskind</div>
+    </div>
+    <!-- Extra players -->
+    <div id="extra-players-list"></div>
+    <!-- Add player button -->
+    <div style="display:flex; gap:10px; margin-top:14px;" id="add-player-row">
+      <input class="input-field" id="new-player-name" placeholder="Mitspieler-Name..." maxlength="20" style="flex:1;" onkeydown="if(event.key==='Enter')addPlayer()">
+      <button class="btn btn-cyan" onclick="addPlayer()" style="white-space:nowrap; padding:10px 18px;">+ Hinzufügen</button>
+    </div>
+    <div style="font-size:0.78rem; opacity:0.4; margin-top:8px; text-align:center;">Mindestens 1 Mitspieler, maximal 5</div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-sub">Wie viele Spiele heute?</div>
+  <div class="flex-row">
+    <button class="btn btn-secondary btn-small" onclick="setGameCount(3)">3 Spiele</button>
+    <button class="btn btn-secondary btn-small" onclick="setGameCount(5)">5 Spiele</button>
+    <button class="btn btn-secondary btn-small" onclick="setGameCount(7)">7 Spiele</button>
+    <button class="btn btn-secondary btn-small" onclick="setGameCount(10)">ALLE 10</button>
+  </div>
+  <div id="game-count-display" style="font-family:'Fredoka One',cursive; font-size:1.1rem; color:var(--gold); margin-top:12px; text-align:center;"></div>
+
+  <div class="divider"></div>
+  <button class="btn btn-secondary w100 mw600" style="font-size:1rem; padding:14px;" onclick="goToCustomize()">
+    ✏️ Fragen personalisieren (optional)
+  </button>
+
+  <button class="btn btn-gold mt20 btn-huge" onclick="goToGameSelect()" id="start-btn">
+    🚀 SPIEL STARTEN!
+  </button>
+</div>
+
+<!-- ===== SCREEN: CUSTOMIZE ===== -->
+<div class="screen" id="screen-customize">
+  <span style="font-size:2.5rem; text-align:center; margin-top:20px;">✏️</span>
+  <div class="section-title mt10" style="color: var(--gold);">FRAGEN PERSONALISIEREN</div>
+  <div class="section-sub">Eigene Fragen hinzufügen — werden im Spiel gemischt!</div>
+
+  <!-- Tab bar -->
+  <div id="customize-tabs" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:16px 0; max-width:700px; width:100%;"></div>
+
+  <!-- Tab content -->
+  <div id="customize-content" class="mw600" style="width:100%;"></div>
+
+  <div style="display:flex; gap:12px; margin-top:24px; max-width:600px; width:100%;">
+    <button class="btn btn-secondary" style="flex:1; padding:14px;" onclick="showScreen('setup')">← Zurück</button>
+    <button class="btn btn-gold" style="flex:1; padding:14px; font-size:1.1rem;" onclick="goToGameSelect()">🚀 SPIEL STARTEN!</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: GAME SELECT ===== -->
+<div class="screen" id="screen-gameselect">
+  <div style="text-align:center; margin-top:20px; padding-bottom: 10px;">
+    <span class="jester-icon" style="font-size:2rem; animation-duration: 3s;">🤡</span>
+    <div class="section-title" style="color: var(--gold);">SPIELWAHL</div>
+    <div class="section-sub" id="picker-label">Das Geburtstagskind wählt!</div>
+  </div>
+
+  <div id="gameselect-scoreboard" class="scoreboard"></div>
+
+  <div class="scroll-area mw900">
+    <div class="game-grid" id="game-grid"></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: GAME PLAYING ===== -->
+<div class="screen" id="screen-game">
+  <div id="game-content" style="width:100%; max-width:700px; display:flex; flex-direction:column; align-items:center;"></div>
+</div>
+
+<!-- ===== SCREEN: GAME RESULT ===== -->
+<div class="screen" id="screen-result">
+  <div id="result-content" style="width:100%; max-width:600px; display:flex; flex-direction:column; align-items:center; margin-top:30px;"></div>
+</div>
+
+<!-- ===== SCREEN: WINNER ===== -->
+<div class="screen" id="screen-winner">
+  <div style="text-align:center; margin-top:40px; width:100%;">
+    <span class="winner-crown">👑</span>
+    <div class="section-title mt20" style="color:var(--gold); font-size:1.5rem; letter-spacing:4px;">DER SIEGER VON</div>
+    <div class="logo" style="font-size:clamp(2rem,7vw,5rem);">SCHLAG DEN NARR</div>
+    <div class="divider mt20"></div>
+    <div class="winner-name" id="winner-name-display">???</div>
+    <div class="winner-text" id="winner-subtitle"></div>
+    <div id="final-scores" class="scoreboard mt20"></div>
+    <div class="mt30 flex-row">
+      <button class="btn btn-gold btn-huge" onclick="resetGame()">🔄 NOCHMAL SPIELEN</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ═══════════════════════════════════════════════════
+//  SUPABASE REALTIME
+// ═══════════════════════════════════════════════════
+const SUPA_URL = 'https://iismcfyjlxtslqdbomtj.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc21jZnlqbHh0c2xxZGJvbXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA2NjEsImV4cCI6MjA4ODM1NjY2MX0.ZYLWzBmIhOyZH43adYeaXvDanzQGcu59WXLcyEzNvu8';
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const ROOM = 'schlag-den-narr-main';
+let realtimeChannel = null;
+
+function initRealtime() {
+  realtimeChannel = sb.channel(ROOM, { config: { broadcast: { self: false } } });
+
+  // Listen for buzzer presses from player devices
+  realtimeChannel.on('broadcast', { event: 'buzz' }, ({ payload }) => {
+    const { side, playerName: pName } = payload;
+    // Dispatch to whatever buzz handler is currently active
+    if (typeof window.__activeBuzzHandler === 'function') {
+      window.__activeBuzzHandler(side, pName);
+    }
+  });
+
+  realtimeChannel.subscribe();
+}
+
+function broadcast(event, payload) {
+  if (!realtimeChannel) return;
+  realtimeChannel.send({ type: 'broadcast', event, payload });
+}
+
+// Call after page load
+window.addEventListener('load', initRealtime);
+
+// ═══════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════
+let state = {
+  birthdayKid: '',
+  challenger: '',  // kept for legacy compat = players[0]
+  photoUrl: '',
+  scores: { birthday: 0, challenger: 0 },
+  playedGames: [],
+  maxGames: 5,
+  currentGame: null,
+  currentPlayers: { left: '', right: '' },
+  // Multi-player
+  players: [],       // all challengers (not birthday kid)
+  allScores: {},     // name -> score (birthday kid + all players)
+  currentMatchup: { left: 0, right: 1 }, // indices into [birthdayKid, ...players]
+  // Custom questions
+  customQuestions: {
+    quiz: [],        // {q, opts:['A','B','C','D'], a:0}
+    birthday: [],    // {q, type:'open'|'guess'}
+    trueFalse: [],   // {q, a:true|false}
+    numbers: [],     // {q, a:number, unit:''}
+    emoji: [],       // {emojis:'', answer:'', hint:''}
+    words: [],       // {name:'', examples:[]}
+    physical: [],    // {name:'', desc:'', icon:''}
+  }
+};
+
+// ═══════════════════════════════════════════════════
+//  GAME DEFINITIONS
+// ═══════════════════════════════════════════════════
+const ALL_GAMES = [
+  {
+    id: 'photo_reveal',
+    name: 'Wer bin ich?',
+    icon: '📸',
+    type: 'Foto-Rätsel',
+    points: 5,
+    desc: 'Ein Foto wird langsam klarer — wer errät es als Erstes?',
+    color: '#8B00FF',
+    play: playPhotoReveal
+  },
+  {
+    id: 'quiz_general',
+    name: 'Allgemeinwissen',
+    icon: '🧠',
+    type: 'Quiz',
+    points: 3,
+    desc: 'Knifflige Fragen aus allem was es gibt!',
+    color: '#0066FF',
+    play: playQuiz
+  },
+  {
+    id: 'quiz_birthday',
+    name: 'Kenn ich das Kind?',
+    icon: '🎂',
+    type: 'Persönliches Quiz',
+    points: 7,
+    desc: 'Fragen rund ums Geburtstagskind — wer kennt es besser?',
+    color: '#FF6B00',
+    play: playBirthdayQuiz
+  },
+  {
+    id: 'reaction',
+    name: 'Blitzreaktion',
+    icon: '⚡',
+    type: 'Schnelligkeit',
+    points: 4,
+    desc: 'Wer drückt zuerst wenn das Licht leuchtet?',
+    color: '#FFD700',
+    play: playReaction
+  },
+  {
+    id: 'memory_spot',
+    name: 'Wo war das?',
+    icon: '🎯',
+    type: 'Gedächtnis',
+    points: 6,
+    desc: 'Merke dir den Ort! Dann zeige ihn auf einem leeren Bild.',
+    color: '#00CC88',
+    play: playMemorySpot
+  },
+  {
+    id: 'word_chain',
+    name: 'Wörter-Staffel',
+    icon: '🔤',
+    type: 'Sprache',
+    points: 4,
+    desc: 'Schnell & abwechselnd Wörter zu einem Thema nennen!',
+    color: '#FF3366',
+    play: playWordChain
+  },
+  {
+    id: 'number_guess',
+    name: 'Zahlen-Duell',
+    icon: '🔢',
+    type: 'Schätzen',
+    points: 3,
+    desc: 'Wer kommt der richtigen Zahl näher?',
+    color: '#00AAFF',
+    play: playNumberGuess
+  },
+  {
+    id: 'physical_challenge',
+    name: 'Körper-Challenge',
+    icon: '🏃',
+    type: 'Sport',
+    points: 8,
+    desc: 'Eine Sportaufgabe — Schnelligkeit oder Geschick!',
+    color: '#FF5500',
+    play: playPhysicalChallenge
+  },
+  {
+    id: 'emoji_quiz',
+    name: 'Emoji-Rätsel',
+    icon: '🤩',
+    type: 'Quiz',
+    points: 3,
+    desc: 'Was bedeuten diese Emojis? Film? Lied? Person?',
+    color: '#CC00FF',
+    play: playEmojiQuiz
+  },
+  {
+    id: 'true_false',
+    name: 'Wahr oder Falsch',
+    icon: '✅',
+    type: 'Quiz',
+    points: 4,
+    desc: 'Stimmt das oder lügen wir? Dein Bauchgefühl entscheidet!',
+    color: '#009966',
+    play: playTrueFalse
+  },
+];
+
+// ═══════════════════════════════════════════════════
+//  SCREENS
+// ═══════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════
+function startSetup() {
+  const name = document.getElementById('birthday-name').value.trim();
+  if (!name) { showToast('❗ Bitte Namen eingeben!'); return; }
+  state.birthdayKid = name;
+  state.photoUrl = document.getElementById('photo-upload-url').value.trim();
+  document.getElementById('birthday-display').textContent = name;
+  state.players = [];
+  renderExtraPlayers();
+  showScreen('setup');
+}
+
+function renderExtraPlayers() {
+  const list = document.getElementById('extra-players-list');
+  list.innerHTML = state.players.map((p, i) => `
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-size:1.3rem;">${['⚔️','🔥','💥','🎯','🌟'][i]}</div>
+      <div style="flex:1; font-family:'Fredoka One',cursive; color:var(--cyan);">${p}</div>
+      <button onclick="removePlayer(${i})" style="background:none; border:none; color:rgba(255,100,100,0.8); font-size:1.2rem; cursor:pointer; padding:4px 8px;">✕</button>
+    </div>
+  `).join('');
+  // Hide add row when max reached
+  document.getElementById('add-player-row').style.display = state.players.length >= 5 ? 'none' : 'flex';
+}
+
+function addPlayer() {
+  const inp = document.getElementById('new-player-name');
+  const name = inp.value.trim();
+  if (!name) { showToast('❗ Namen eingeben!'); return; }
+  if (state.players.length >= 5) { showToast('❗ Maximal 5 Mitspieler!'); return; }
+  if (name.toLowerCase() === state.birthdayKid.toLowerCase()) { showToast('❗ Name schon vergeben!'); return; }
+  if (state.players.map(p=>p.toLowerCase()).includes(name.toLowerCase())) { showToast('❗ Name schon vergeben!'); return; }
+  state.players.push(name);
+  inp.value = '';
+  inp.focus();
+  renderExtraPlayers();
+  showToast(`✅ ${name} hinzugefügt!`);
+}
+
+function removePlayer(i) {
+  state.players.splice(i, 1);
+  renderExtraPlayers();
+}
+
+function setGameCount(n) {
+  state.maxGames = n;
+  document.getElementById('game-count-display').textContent = `✓ ${n} Spiele gewählt`;
+  showToast(`${n} Spiele – auf geht's!`);
+}
+
+function allPlayersList() {
+  return [state.birthdayKid, ...state.players];
+}
+
+function goToCustomize() {
+  if (state.players.length === 0) { showToast('❗ Mindestens 1 Mitspieler hinzufügen!'); return; }
+  renderCustomizeTabs();
+  showScreen('customize');
+}
+
+function goToGameSelect() {
+  if (state.players.length === 0) { showToast('❗ Mindestens 1 Mitspieler hinzufügen!'); return; }
+  // Set legacy challenger for 1v1 compat
+  state.challenger = state.players[0];
+  // Init all scores
+  state.allScores = {};
+  state.allScores[state.birthdayKid] = 0;
+  state.players.forEach(p => state.allScores[p] = 0);
+  state.scores = { birthday: 0, challenger: 0 };
+  state.playedGames = [];
+  state.currentMatchup = { leftIdx: 0, rightIdx: 1 };
+  renderGameSelect();
+  showScreen('gameselect');
+}
+
+// ═══════════════════════════════════════════════════
+//  CUSTOMIZE QUESTIONS
+// ═══════════════════════════════════════════════════
+const CUSTOMIZE_TABS = [
+  { key: 'quiz',     label: '🧠 Quiz',       color: '#0066FF' },
+  { key: 'trueFalse',label: '✅ Wahr/Falsch', color: '#009966' },
+  { key: 'birthday', label: '🎂 Geburtstag',  color: '#FF6B00' },
+  { key: 'numbers',  label: '🔢 Zahlen',      color: '#00AAFF' },
+  { key: 'emoji',    label: '🤩 Emojis',      color: '#CC00FF' },
+  { key: 'words',    label: '🔤 Wörter',      color: '#FF3366' },
+  { key: 'physical', label: '🏃 Sport',       color: '#FF5500' },
+];
+
+let currentCustomizeTab = 'quiz';
+
+function renderCustomizeTabs() {
+  const tabBar = document.getElementById('customize-tabs');
+  tabBar.innerHTML = CUSTOMIZE_TABS.map(t => `
+    <button onclick="switchCustomizeTab('${t.key}')" id="ctab-${t.key}"
+      style="padding:8px 14px; border-radius:20px; border:2px solid ${currentCustomizeTab===t.key ? t.color : 'rgba(255,255,255,0.15)'}; background:${currentCustomizeTab===t.key ? t.color+'33' : 'rgba(255,255,255,0.05)'}; color:${currentCustomizeTab===t.key ? '#fff' : 'rgba(255,255,255,0.6)'}; cursor:pointer; font-family:'Fredoka One',cursive; font-size:0.85rem; transition:all .2s;">
+      ${t.label}
+    </button>
+  `).join('');
+  renderCustomizeContent();
+}
+
+function switchCustomizeTab(key) {
+  currentCustomizeTab = key;
+  renderCustomizeTabs();
+}
+
+function renderCustomizeContent() {
+  const cont = document.getElementById('customize-content');
+  const key = currentCustomizeTab;
+  const items = state.customQuestions[key];
+
+  let formHTML = '';
+  if (key === 'quiz') {
+    formHTML = `
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div class="small-label mb10">Neue Quiz-Frage (Multiple Choice)</div>
+        <input class="input-field mb10" id="cq-question" placeholder="Frage...">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <input class="input-field" id="cq-a" placeholder="Option A">
+          <input class="input-field" id="cq-b" placeholder="Option B">
+          <input class="input-field" id="cq-c" placeholder="Option C">
+          <input class="input-field" id="cq-d" placeholder="Option D">
+        </div>
+        <div class="small-label mb10">Richtige Antwort:</div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          ${['A','B','C','D'].map((l,i) => `<button class="btn btn-small" id="cq-correct-${i}" onclick="selectCorrect(${i})" style="flex:1; background:rgba(255,255,255,0.1);">${l}</button>`).join('')}
+        </div>
+        <button class="btn btn-cyan w100" onclick="addCustomQuiz()">✅ Frage hinzufügen</button>
+      </div>`;
+  } else if (key === 'trueFalse') {
+    formHTML = `
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div class="small-label mb10">Neue Wahr/Falsch-Aussage</div>
+        <input class="input-field mb10" id="ctf-q" placeholder="Aussage...">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" id="ctf-true-btn" onclick="setTFAnswer(true)" style="flex:1;">✅ Wahr</button>
+          <button class="btn btn-secondary" id="ctf-false-btn" onclick="setTFAnswer(false)" style="flex:1;">❌ Falsch</button>
+        </div>
+        <div id="ctf-selected" style="text-align:center; font-family:'Fredoka One',cursive; color:var(--gold); margin:8px 0; font-size:0.9rem;"></div>
+        <button class="btn btn-cyan w100 mt10" onclick="addCustomTF()">✅ Hinzufügen</button>
+      </div>`;
+  } else if (key === 'birthday') {
+    formHTML = `
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div class="small-label mb10">Neue persönliche Frage über ${state.birthdayKid}</div>
+        <input class="input-field mb10" id="cbd-q" placeholder="Frage (z.B. Was ist ${state.birthdayKid}'s Lieblingsfilm?)">
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <button class="btn btn-small" id="cbd-open-btn" onclick="setBDType('open')" style="flex:1; background:var(--purple)20; border:2px solid var(--purple);">Offen</button>
+          <button class="btn btn-small" id="cbd-guess-btn" onclick="setBDType('guess')" style="flex:1; background:rgba(255,255,255,0.1);">Schätzen</button>
+        </div>
+        <button class="btn btn-cyan w100" onclick="addCustomBirthday()">✅ Hinzufügen</button>
+      </div>`;
+  } else if (key === 'numbers') {
+    formHTML = `
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div class="small-label mb10">Neue Schätz-Frage</div>
+        <input class="input-field mb10" id="cnum-q" placeholder="Frage (z.B. Wie viele Stufen hat der Eiffelturm?)">
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <input class="input-field" id="cnum-a" placeholder="Richtige Zahl" type="number" style="flex:2;">
+          <input class="input-field" id="cnum-unit" placeholder="Einheit (opt.)" style="flex:1;">
+        </div>
+        <button class="btn btn-cyan w100" onclick="addCustomNumber()">✅ Hinzufügen</button>
+      </div>`;
+  } else if (key === 'emoji') {
+    formHTML = `
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div class="small-label mb10">Neues Emoji-Rätsel</div>
+        <input class="input-field mb10" id="cem-emojis" placeholder="Emojis (z.B. 🦁👑)" style="font-size:1.5rem;">
+        <input class="input-field mb10" id="cem-answer" placeholder="Antwort (z.B. König der Löwen)">
+        <input class="input-field mb10" id="cem-hint" placeholder="Hinweis (z.B. Disney Film)">
+        <button class="btn btn-cyan w100" onclick="addCustomEmoji()">✅ Hinzufügen</button>
+      </div>`;
+  } else if (key === 'words') {
+    formHTML = `
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div class="small-label mb10">Neue Wörter-Kategorie</div>
+        <input class="input-field mb10" id="cwrd-name" placeholder="Kategoriename (z.B. Superhelden 🦸)">
+        <input class="input-field mb10" id="cwrd-examples" placeholder="3 Beispiele, kommagetrennt (z.B. Batman, Thor, Flash)">
+        <button class="btn btn-cyan w100" onclick="addCustomWords()">✅ Hinzufügen</button>
+      </div>`;
+  } else if (key === 'physical') {
+    formHTML = `
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div class="small-label mb10">Neue Sport-Challenge</div>
+        <input class="input-field mb10" id="cphy-name" placeholder="Name (z.B. Luftballon-Battle!)">
+        <input class="input-field mb10" id="cphy-desc" placeholder="Beschreibung (Was soll man tun?)">
+        <input class="input-field mb10" id="cphy-icon" placeholder="Emoji-Icon (z.B. 🎈)">
+        <button class="btn btn-cyan w100" onclick="addCustomPhysical()">✅ Hinzufügen</button>
+      </div>`;
+  }
+
+  const existingHTML = items.length > 0 ? `
+    <div class="small-label mb10" style="color:var(--gold);">✨ Eigene Einträge (${items.length})</div>
+    ${items.map((item, i) => `
+      <div style="display:flex; align-items:center; gap:10px; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px; margin-bottom:8px;">
+        <div style="flex:1; font-size:0.9rem; opacity:0.85;">${formatCustomItem(key, item)}</div>
+        <button onclick="removeCustomItem('${key}', ${i})" style="background:none; border:none; color:rgba(255,100,100,0.8); font-size:1.1rem; cursor:pointer;">✕</button>
+      </div>
+    `).join('')}
+    <div class="divider"></div>
+  ` : '';
+
+  cont.innerHTML = existingHTML + formHTML;
+
+  // Re-init temp state for form buttons
+  window._cqCorrect = 0;
+  window._ctfAnswer = null;
+  window._cbdType = 'open';
+}
+
+function formatCustomItem(key, item) {
+  if (key === 'quiz') return `❓ ${item.q} → ${item.opts[item.a]}`;
+  if (key === 'trueFalse') return `${item.a ? '✅' : '❌'} ${item.q}`;
+  if (key === 'birthday') return `🎂 ${item.q} (${item.type})`;
+  if (key === 'numbers') return `🔢 ${item.q} → ${item.a}${item.unit}`;
+  if (key === 'emoji') return `${item.emojis} → ${item.answer}`;
+  if (key === 'words') return `🔤 ${item.name}: ${item.examples.join(', ')}`;
+  if (key === 'physical') return `${item.icon} ${item.name}`;
+  return '';
+}
+
+function removeCustomItem(key, i) {
+  state.customQuestions[key].splice(i, 1);
+  renderCustomizeContent();
+}
+
+function selectCorrect(i) {
+  window._cqCorrect = i;
+  ['A','B','C','D'].forEach((l, idx) => {
+    const btn = document.getElementById(`cq-correct-${idx}`);
+    if (btn) btn.style.background = idx === i ? 'var(--green)' : 'rgba(255,255,255,0.1)';
+  });
+}
+
+function setTFAnswer(val) {
+  window._ctfAnswer = val;
+  document.getElementById('ctf-selected').textContent = val ? '✅ Antwort: WAHR' : '❌ Antwort: FALSCH';
+  document.getElementById('ctf-true-btn').style.background = val ? 'var(--green)' : '';
+  document.getElementById('ctf-false-btn').style.background = !val ? 'var(--red)' : '';
+}
+
+function setBDType(type) {
+  window._cbdType = type;
+  document.getElementById('cbd-open-btn').style.background = type==='open' ? 'rgba(139,0,255,0.4)' : 'rgba(255,255,255,0.1)';
+  document.getElementById('cbd-guess-btn').style.background = type==='guess' ? 'rgba(0,200,255,0.4)' : 'rgba(255,255,255,0.1)';
+}
+
+function addCustomQuiz() {
+  const q = document.getElementById('cq-question').value.trim();
+  const a = document.getElementById('cq-a').value.trim();
+  const b = document.getElementById('cq-b').value.trim();
+  const c = document.getElementById('cq-c').value.trim();
+  const d = document.getElementById('cq-d').value.trim();
+  if (!q || !a || !b || !c || !d) { showToast('❗ Alle Felder ausfüllen!'); return; }
+  state.customQuestions.quiz.push({ q, opts: [a, b, c, d], a: window._cqCorrect || 0 });
+  showToast('✅ Frage hinzugefügt!');
+  renderCustomizeContent();
+}
+
+function addCustomTF() {
+  const q = document.getElementById('ctf-q').value.trim();
+  if (!q) { showToast('❗ Aussage eingeben!'); return; }
+  if (window._ctfAnswer === null) { showToast('❗ Bitte Wahr oder Falsch wählen!'); return; }
+  state.customQuestions.trueFalse.push({ q, a: window._ctfAnswer });
+  showToast('✅ Hinzugefügt!');
+  renderCustomizeContent();
+}
+
+function addCustomBirthday() {
+  const q = document.getElementById('cbd-q').value.trim();
+  if (!q) { showToast('❗ Frage eingeben!'); return; }
+  state.customQuestions.birthday.push({ q, type: window._cbdType || 'open', kid_answers: true });
+  showToast('✅ Hinzugefügt!');
+  renderCustomizeContent();
+}
+
+function addCustomNumber() {
+  const q = document.getElementById('cnum-q').value.trim();
+  const a = parseFloat(document.getElementById('cnum-a').value);
+  const unit = document.getElementById('cnum-unit').value.trim();
+  if (!q || isNaN(a)) { showToast('❗ Frage und Zahl eingeben!'); return; }
+  state.customQuestions.numbers.push({ q, a, unit: unit ? ' ' + unit : '' });
+  showToast('✅ Hinzugefügt!');
+  renderCustomizeContent();
+}
+
+function addCustomEmoji() {
+  const emojis = document.getElementById('cem-emojis').value.trim();
+  const answer = document.getElementById('cem-answer').value.trim();
+  const hint = document.getElementById('cem-hint').value.trim();
+  if (!emojis || !answer) { showToast('❗ Emojis und Antwort eingeben!'); return; }
+  state.customQuestions.emoji.push({ emojis, answer, hint: hint || 'Eigene Frage' });
+  showToast('✅ Hinzugefügt!');
+  renderCustomizeContent();
+}
+
+function addCustomWords() {
+  const name = document.getElementById('cwrd-name').value.trim();
+  const exStr = document.getElementById('cwrd-examples').value.trim();
+  if (!name || !exStr) { showToast('❗ Name und Beispiele eingeben!'); return; }
+  const examples = exStr.split(',').map(e => e.trim()).filter(Boolean);
+  state.customQuestions.words.push({ name, examples });
+  showToast('✅ Hinzugefügt!');
+  renderCustomizeContent();
+}
+
+function addCustomPhysical() {
+  const name = document.getElementById('cphy-name').value.trim();
+  const desc = document.getElementById('cphy-desc').value.trim();
+  const icon = document.getElementById('cphy-icon').value.trim() || '🏆';
+  if (!name || !desc) { showToast('❗ Name und Beschreibung eingeben!'); return; }
+  state.customQuestions.physical.push({ name, desc, icon });
+  showToast('✅ Hinzugefügt!');
+  renderCustomizeContent();
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME SELECT
+// ═══════════════════════════════════════════════════
+function renderGameSelect() {
+  document.getElementById('picker-label').textContent =
+    `⭐ ${state.birthdayKid} wählt das nächste Spiel!`;
+
+  // Scoreboard
+  const sb = document.getElementById('gameselect-scoreboard');
+  sb.innerHTML = scoreboardHTML();
+
+  // Grid
+  const grid = document.getElementById('game-grid');
+  grid.innerHTML = '';
+  ALL_GAMES.forEach(g => {
+    const played = state.playedGames.includes(g.id);
+    const div = document.createElement('div');
+    div.className = 'game-tile' + (played ? ' played' : '');
+    div.style.setProperty('--accent', g.color);
+    div.style.borderTopColor = played ? 'transparent' : g.color;
+    div.style.borderTopWidth = '3px';
+    div.innerHTML = `
+      <span class="game-tile-icon">${g.icon}</span>
+      <div class="game-tile-name">${g.name}</div>
+      <div class="game-tile-type">${g.type}</div>
+      <span class="game-tile-points">⭐ ${g.points} Punkte</span>
+      <div class="game-tile-desc">${g.desc}</div>
+    `;
+    if (!played) div.onclick = () => selectGame(g);
+    grid.appendChild(div);
+  });
+}
+
+function selectGame(game) {
+  state.currentGame = game;
+  launchGame(game);
+}
+
+// ═══════════════════════════════════════════════════
+//  PLAYER SELECTION BEFORE GAME
+// ═══════════════════════════════════════════════════
+function buildBroadcastState(extra = {}) {
+  return {
+    phase: 'playing',
+    birthdayKid: state.birthdayKid,
+    playerLeft: state.currentPlayers.left,
+    playerRight: state.currentPlayers.right,
+    allScores: state.allScores,
+    allPlayers: allPlayersList(),
+    playedCount: state.playedGames.length,
+    maxGames: state.maxGames,
+    photoUrl: state.photoUrl,
+    ...extra
+  };
+}
+
+function launchGame(game) {
+  const allP = allPlayersList();
+  state.currentPlayers.left = state.birthdayKid;
+  const rightIdx = state.playedGames.length % state.players.length;
+  state.currentPlayers.right = state.players[rightIdx];
+  state.challenger = state.currentPlayers.right;
+  showScreen('game');
+  broadcast('game_state', buildBroadcastState({
+    phase: 'playing',
+    gameId: game.id,
+    gameName: game.name,
+    gameIcon: game.icon,
+    gamePoints: game.points,
+    displayContent: { type: 'game_start' }
+  }));
+  game.play();
+}
+
+// ═══════════════════════════════════════════════════
+//  HELPER: RENDER GAME HEADER
+// ═══════════════════════════════════════════════════
+function gameHeader(game) {
+  return `
+    <div style="width:100%; display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+      <button class="btn btn-small" onclick="confirmBackToSelect()" style="background:rgba(255,255,255,0.1); font-size:0.85rem; padding:8px 14px; border:1px solid rgba(255,255,255,0.2);">← Zurück</button>
+      <div style="flex:1;"></div>
+    </div>
+    <div class="round-badge">🤡 ${game.icon} ${game.name} &mdash; <span style="color:var(--gold)">⭐ ${game.points} Punkte</span></div>
+    <div class="scoreboard" style="margin:10px 0 20px;">${scoreboardHTML()}</div>
+  `;
+}
+
+function confirmBackToSelect() {
+  const modal = document.getElementById('back-modal');
+  modal.style.display = 'flex';
+}
+
+function scoreboardHTML() {
+  const allPlayers = allPlayersList();
+  if (allPlayers.length <= 2) {
+    // Classic 1v1 layout
+    const bScore = state.allScores[state.birthdayKid] ?? 0;
+    const cScore = state.allScores[state.players[0]] ?? 0;
+    return `
+      <div class="score-card">
+        <div class="score-name">⭐ ${state.birthdayKid}</div>
+        <div class="score-value">${bScore}</div>
+        <div class="score-label">Punkte</div>
+      </div>
+      <div style="font-family:'Bangers',cursive; font-size:2rem; align-self:center; color:rgba(255,255,255,0.3);">VS</div>
+      <div class="score-card">
+        <div class="score-name">⚔️ ${state.players[0] || '?'}</div>
+        <div class="score-value">${cScore}</div>
+        <div class="score-label">Punkte</div>
+      </div>
+    `;
+  }
+  // Multi-player: compact row
+  const icons = ['⭐','⚔️','🔥','💥','🎯','🌟'];
+  return `<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; width:100%;">` +
+    allPlayers.map((p, i) => `
+      <div style="background:rgba(255,255,255,0.07); border-radius:12px; padding:10px 16px; text-align:center; min-width:80px;">
+        <div style="font-size:0.75rem; opacity:0.5;">${icons[i]}</div>
+        <div style="font-family:'Fredoka One',cursive; font-size:0.9rem; color:${i===0?'var(--gold)':'var(--cyan)'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90px;">${p}</div>
+        <div style="font-family:'Bangers',cursive; font-size:1.6rem; color:white;">${state.allScores[p] ?? 0}</div>
+      </div>
+    `).join('') +
+  '</div>';
+}
+
+// ═══════════════════════════════════════════════════
+//  BUZZ SYSTEM
+// ═══════════════════════════════════════════════════
+function buzzAreaHTML(onBuzz) {
+  // Register this handler so remote buzzer devices can trigger it
+  window.__activeBuzzFnName = onBuzz;
+  window.__activeBuzzHandler = function(side) { window[onBuzz](side); };
+  return `
+    <div class="buzz-area" style="justify-items:center;">
+      <button class="buzz-btn left" onclick="${onBuzz}('left')" id="buzz-left">
+        <span style="font-size:1.5rem">🔴</span>
+        <span class="buzz-name">${state.birthdayKid.split(' ')[0]}</span>
+        <span style="font-size:0.85rem; opacity:0.8; letter-spacing:1px; font-family:'Nunito',sans-serif; font-weight:700;">BUZZ!</span>
+      </button>
+      <button class="buzz-btn right" onclick="${onBuzz}('right')" id="buzz-right">
+        <span style="font-size:1.5rem">🔵</span>
+        <span class="buzz-name">${state.challenger.split(' ')[0]}</span>
+        <span style="font-size:0.85rem; opacity:0.8; letter-spacing:1px; font-family:'Nunito',sans-serif; font-weight:700;">BUZZ!</span>
+      </button>
+    </div>
+  `;
+}
+
+function playerName(side) {
+  return side === 'left' ? state.birthdayKid : state.currentPlayers.right || state.challenger;
+}
+
+function awardPoints(side, pts) {
+  const name = playerName(side);
+  if (side === 'left') state.scores.birthday += pts;
+  else state.scores.challenger += pts;
+  if (name && state.allScores[name] !== undefined) {
+    state.allScores[name] += pts;
+  }
+  broadcast('scores', { allScores: state.allScores, allPlayers: allPlayersList() });
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: PHOTO REVEAL
+// ═══════════════════════════════════════════════════
+function playPhotoReveal() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  let blurLevel = 30;
+  let timerInterval = null;
+  let buzzed = null;
+  let totalTime = 30;
+  let elapsed = 0;
+
+  const photoEmojis = ['🌈','🎸','🚀','🦁','🍕','⛰️','🎪','🌊','🦋','🎨'];
+  const randEmoji = photoEmojis[Math.floor(Math.random() * photoEmojis.length)];
+
+  gc.innerHTML = `
+    ${gameHeader(game)}
+    <div class="section-title" style="font-size:1.6rem;">📸 Wer ist das?</div>
+    <div class="photo-hint" id="photo-hint">Das Bild wird langsam klarer... Drückt wenn ihr es wisst!</div>
+    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="photo-timer" style="width:100%"></div></div>
+    <div class="photo-container" id="photo-box">
+      <div class="demo-image" id="photo-inner" style="filter:blur(30px);">${state.photoUrl ? '' : randEmoji}</div>
+      ${state.photoUrl ? `<img class="photo-img" id="photo-img-el" src="${state.photoUrl}" style="filter:blur(30px);" onerror="this.style.display='none'">` : ''}
+    </div>
+    <div class="blur-progress-bar"><div class="blur-progress-fill" id="blur-prog" style="width:0%"></div></div>
+    <div id="buzz-section">${buzzAreaHTML('buzzPhotoReveal')}</div>
+    <div id="answer-section"></div>
+  `;
+
+  window.buzzPhotoReveal = function(side) {
+    if (buzzed) return;
+    buzzed = side;
+    clearInterval(timerInterval);
+    document.getElementById('buzz-' + side).classList.add('buzzing');
+    document.getElementById('buzz-section').innerHTML = `
+      <div class="result-msg draw" style="font-size:1.3rem; margin:20px 0;">
+        🎯 ${playerName(side)} hat gedrückt!<br>
+        <span style="font-size:1rem; font-family:'Nunito',sans-serif; opacity:0.8; font-weight:700;">Was glaubst du: Wer ist auf dem Bild?</span>
+      </div>
+    `;
+
+    // Reveal full image
+    const inner = document.getElementById('photo-inner');
+    const imgEl = document.getElementById('photo-img-el');
+    if (inner) inner.style.filter = 'blur(0px)';
+    if (imgEl) imgEl.style.filter = 'blur(0px)';
+
+    document.getElementById('answer-section').innerHTML = `
+      <div class="flex-row mt20">
+        <button class="btn btn-primary" onclick="endPhotoReveal('${side}', true)">✅ Richtig geraten!</button>
+        <button class="btn btn-secondary" onclick="endPhotoReveal('${side}', false)">❌ Falsch geraten</button>
+      </div>
+    `;
+  };
+
+  window.endPhotoReveal = function(side, correct) {
+    if (correct) {
+      // Faster = more points: max 5 pts
+      const remaining = 1 - elapsed / totalTime;
+      const pts = Math.max(1, Math.round(game.points * remaining));
+      awardPoints(side, pts);
+      showResult(`🎉 ${playerName(side)} hat es erraten!`, pts, side, game.points);
+    } else {
+      const otherSide = side === 'left' ? 'right' : 'left';
+      awardPoints(otherSide, Math.floor(game.points / 2));
+      showResult(`😂 Daneben! ${playerName(otherSide)} bekommt Punkte!`, Math.floor(game.points / 2), otherSide, game.points);
+    }
+  };
+
+  // Timer that unblurs
+  timerInterval = setInterval(() => {
+    elapsed++;
+    const pct = elapsed / totalTime;
+    blurLevel = Math.max(0, 30 * (1 - pct));
+    const inner = document.getElementById('photo-inner');
+    const imgEl = document.getElementById('photo-img-el');
+    if (inner) inner.style.filter = `blur(${blurLevel}px)`;
+    if (imgEl) imgEl.style.filter = `blur(${blurLevel}px)`;
+    const tb = document.getElementById('photo-timer');
+    const bp = document.getElementById('blur-prog');
+    if (tb) {
+      tb.style.width = ((1 - pct) * 100) + '%';
+      if (pct > 0.7) tb.classList.add('urgent');
+    }
+    if (bp) bp.style.width = (pct * 100) + '%';
+    // Broadcast blur level to dashboard every second
+    broadcast('display', {
+      type: 'photo_blur',
+      blurLevel,
+      photoUrl: state.photoUrl,
+      randEmoji,
+      timerPct: 1 - pct,
+      gameId: 'photo_reveal'
+    });
+    if (elapsed >= totalTime) {
+      clearInterval(timerInterval);
+      if (!buzzed) {
+        document.getElementById('buzz-section').innerHTML = `<div class="result-msg lose">⏰ Zeit abgelaufen! Niemand hat's erraten.</div>`;
+        setTimeout(() => showResult('Unentschieden!', 0, null, game.points), 1500);
+      }
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: QUIZ
+// ═══════════════════════════════════════════════════
+const quizQuestions = [
+  { q: "Was ist die Hauptstadt von Australien?", opts: ["Sydney", "Melbourne", "Canberra", "Brisbane"], a: 2 },
+  { q: "Wie viele Beine hat eine Spinne?", opts: ["6", "8", "10", "12"], a: 1 },
+  { q: "In welchem Jahr fiel die Berliner Mauer?", opts: ["1987", "1989", "1991", "1993"], a: 1 },
+  { q: "Welches ist das größte Organ des menschlichen Körpers?", opts: ["Leber", "Lunge", "Haut", "Herz"], a: 2 },
+  { q: "Wie heißt der schnellste Landläufer der Welt?", opts: ["Tiger", "Gepard", "Löwe", "Pferd"], a: 1 },
+  { q: "Wie viele Saiten hat eine klassische Gitarre?", opts: ["4", "5", "6", "7"], a: 2 },
+  { q: "Welches Element hat das chemische Symbol 'Au'?", opts: ["Silber", "Gold", "Aluminium", "Arsen"], a: 1 },
+  { q: "Wer schrieb 'Die Leiden des jungen Werthers'?", opts: ["Schiller", "Goethe", "Kafka", "Heine"], a: 1 },
+  { q: "Wie viele Planeten hat unser Sonnensystem?", opts: ["7", "8", "9", "10"], a: 1 },
+  { q: "Was ist der höchste Berg der Welt?", opts: ["K2", "Mont Blanc", "Everest", "Kilimandscharo"], a: 2 },
+];
+
+function playQuiz() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  // Mix custom + built-in, custom first
+  const pool = [...state.customQuestions.quiz, ...quizQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
+  const questions = pool;
+  let qIndex = 0;
+  let leftScore = 0, rightScore = 0;
+  let canBuzz = true;
+  let buzzedSide = null;
+
+  function renderQuestion() {
+    if (qIndex >= questions.length) {
+      // Final
+      const winSide = leftScore > rightScore ? 'left' : rightScore > leftScore ? 'right' : null;
+      if (winSide) awardPoints(winSide, game.points);
+      else { awardPoints('left', Math.floor(game.points/2)); awardPoints('right', Math.floor(game.points/2)); }
+      const pts = winSide ? game.points : Math.floor(game.points/2);
+      showResult(winSide ? `🏆 ${playerName(winSide)} gewinnt das Quiz!` : '🤝 Unentschieden!', pts, winSide, game.points);
+      return;
+    }
+    const q = questions[qIndex];
+    canBuzz = true;
+    buzzedSide = null;
+    broadcast('display', {
+      type: 'quiz_question',
+      question: q.q,
+      opts: q.opts,
+      qIndex,
+      total: questions.length,
+      gameId: 'quiz_general'
+    });
+    gc.innerHTML = `
+      ${gameHeader(game)}
+      <div class="round-badge" style="margin-bottom:6px;">Frage ${qIndex+1} von ${questions.length}</div>
+      <div class="card mw600" style="text-align:center; margin-bottom:16px;">
+        <div style="font-size:0.8rem; opacity:0.5; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px;">Allgemeinwissen</div>
+        <div class="quiz-question">${q.q}</div>
+      </div>
+      <div style="font-family:'Fredoka One',cursive; font-size:1rem; color:var(--cyan); margin-bottom:8px;">
+        🔴 ${state.birthdayKid}: ${leftScore} &nbsp;|&nbsp; 🔵 ${state.challenger}: ${rightScore}
+      </div>
+      ${buzzAreaHTML('buzzQuiz')}
+      <div id="quiz-phase2" style="width:100%; max-width:600px;"></div>
+    `;
+
+    window.buzzQuiz = function(side) {
+      if (!canBuzz) return;
+      canBuzz = false;
+      buzzedSide = side;
+      document.getElementById('quiz-phase2').innerHTML = `
+        <div class="result-msg draw" style="margin:10px 0; font-size:1.1rem;">
+          ⚡ ${playerName(side)} antwortet!
+        </div>
+        <div class="quiz-options" style="margin:0 auto;">
+          ${q.opts.map((o,i) => `<button class="quiz-option" onclick="answerQuiz(${i}, '${side}')">${['A','B','C','D'][i]}) ${o}</button>`).join('')}
+        </div>
+      `;
+    };
+
+    window.answerQuiz = function(i, side) {
+      document.querySelectorAll('.quiz-option').forEach((el, idx) => {
+        el.style.pointerEvents = 'none';
+        if (idx === q.a) el.classList.add('correct');
+        else if (idx === i) el.classList.add('wrong');
+      });
+      if (i === q.a) {
+        if (side === 'left') leftScore++;
+        else rightScore++;
+        showToast(`✅ Richtig! +1 für ${playerName(side)}`);
+      } else {
+        showToast(`❌ Falsch! Die Antwort war: ${q.opts[q.a]}`);
+      }
+      qIndex++;
+      setTimeout(renderQuestion, 2200);
+    };
+  }
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: BIRTHDAY QUIZ
+// ═══════════════════════════════════════════════════
+function playBirthdayQuiz() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  const kid = state.birthdayKid;
+
+  const defaultBDQuestions = [
+    { q: `Was ist ${kid}'s Lieblingsessen?`, type: 'open', kid_answers: true },
+    { q: `Wann hat ${kid} heute morgen aufgehört zu schlafen? (Stunde)`, type: 'guess' },
+    { q: `Was ist ${kid}'s größter Wunsch für dieses Jahr?`, type: 'open', kid_answers: true },
+    { q: `Wie alt ist ${kid} heute?`, type: 'guess' },
+    { q: `Was macht ${kid} am liebsten in seiner/ihrer Freizeit?`, type: 'open', kid_answers: true },
+  ];
+  const questions = state.customQuestions.birthday.length > 0
+    ? [...state.customQuestions.birthday, ...defaultBDQuestions].slice(0, 5)
+    : defaultBDQuestions;
+
+  let qIndex = 0;
+  let challengerScore = 0;
+
+  function renderBirthdayQ() {
+    if (qIndex >= questions.length) {
+      const pts = Math.round(game.points * challengerScore / questions.length);
+      const winner = pts >= Math.floor(game.points / 2) ? 'right' : 'left';
+      awardPoints(winner, winner === 'right' ? pts : game.points - pts);
+      showResult(
+        winner === 'right' ? `🏆 ${state.challenger} kennt ${kid} super gut!` : `🎉 ${kid} bleibt ein Geheimnis!`,
+        winner === 'right' ? pts : game.points - pts, winner, game.points
+      );
+      return;
+    }
+    const q = questions[qIndex];
+    gc.innerHTML = `
+      ${gameHeader(game)}
+      <div class="round-badge">Frage ${qIndex+1} von ${questions.length} 🎂</div>
+      <div class="card mw600" style="text-align:center; margin:10px 0 20px;">
+        <div style="font-size:0.8rem; opacity:0.5; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px;">Kennt ihr ${kid}?</div>
+        <div class="quiz-question">${q.q}</div>
+      </div>
+      <div style="font-family:'Fredoka One',cursive; color:var(--cyan); font-size:0.9rem; margin-bottom:10px;">
+        ⭐ ${kid} kennt die Antwort — kann ${state.challenger} sie erraten?
+      </div>
+      <div class="mw600" id="birthday-q-input">
+        ${q.type === 'guess' ? `
+          <input class="input-field" id="bq-answer" placeholder="${state.challenger} rät..." style="text-align:center;">
+          <input class="input-field mt10" id="bq-kidanswer" placeholder="${kid}'s echte Antwort..." style="text-align:center;">
+          <button class="btn btn-cyan mt20 w100" onclick="checkBirthdayQ('${q.type}')">✅ Auswerten</button>
+        ` : `
+          <input class="input-field" id="bq-kidanswer" placeholder="${kid} gibt die echte Antwort ein..." style="text-align:center;">
+          <input class="input-field mt10" id="bq-answer" placeholder="${state.challenger} hat geraten:" style="text-align:center;">
+          <button class="btn btn-cyan mt20 w100" onclick="checkBirthdayQ('${q.type}')">✅ Auswerten</button>
+        `}
+      </div>
+    `;
+
+    window.checkBirthdayQ = function(type) {
+      const a = document.getElementById('bq-answer').value.trim().toLowerCase();
+      const k = document.getElementById('bq-kidanswer').value.trim().toLowerCase();
+      if (!a || !k) { showToast('❗ Beide Felder ausfüllen!'); return; }
+
+      const match = a === k || (a.length > 2 && k.includes(a)) || (k.length > 2 && a.includes(k));
+      if (match) {
+        challengerScore++;
+        showToast(`🎯 Richtig! ${state.challenger} kennt ${kid} gut!`);
+      } else {
+        showToast(`😂 Falsch! Es war: "${document.getElementById('bq-kidanswer').value}"`);
+      }
+      qIndex++;
+      setTimeout(renderBirthdayQ, 2000);
+    };
+  }
+  renderBirthdayQ();
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: REACTION
+// ═══════════════════════════════════════════════════
+function playReaction() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  let waiting = false;
+  let startTime = 0;
+  let round = 0;
+  let scores = { left: 0, right: 0 };
+  const totalRounds = 5;
+
+  function renderReaction() {
+    gc.innerHTML = `
+      ${gameHeader(game)}
+      <div class="section-title" style="font-size:1.6rem;">⚡ BLITZ-REAKTION</div>
+      <div id="react-sub" class="section-sub">Runde ${round+1} von ${totalRounds} — Drückt wenn es GRÜN wird!</div>
+      <div id="react-area" class="sport-game-area">
+        <div id="react-light" style="
+          width:180px; height:180px; border-radius:50%; margin:30px auto;
+          background:radial-gradient(circle at 35% 35%, #333, #111);
+          border:4px solid rgba(255,255,255,0.1);
+          display:flex; align-items:center; justify-content:center;
+          font-size:4rem; box-shadow:0 10px 40px rgba(0,0,0,0.8);
+          transition: background 0.1s, box-shadow 0.1s;
+        ">⏳</div>
+        <div style="font-family:'Fredoka One',cursive; color:rgba(255,255,255,0.5); text-align:center; font-size:1rem;">
+          🔴 ${state.birthdayKid}: ${scores.left} &nbsp;|&nbsp; 🔵 ${state.challenger}: ${scores.right}
+        </div>
+      </div>
+      ${buzzAreaHTML('reactBuzz')}
+      <div id="react-result"></div>
+    `;
+
+    waiting = false;
+    let delay = 2000 + Math.random() * 3000;
+    let buzzed = false;
+
+    let t = setTimeout(() => {
+      waiting = true;
+      startTime = Date.now();
+      buzzed = false;
+      const light = document.getElementById('react-light');
+      if (light) {
+        light.style.background = 'radial-gradient(circle at 35% 35%, #88ff88, #00cc44, #006622)';
+        light.style.boxShadow = '0 0 60px rgba(0,255,100,0.8)';
+        light.innerHTML = '🟢';
+      }
+      // Timeout if nobody presses
+      let autoTimeout = setTimeout(() => {
+        if (!buzzed) {
+          waiting = false;
+          showToast('⏰ Zu langsam! Nächste Runde...');
+          round++;
+          if (round < totalRounds) setTimeout(renderReaction, 1200);
+          else endReaction();
+        }
+      }, 2500);
+      window._reactAutoTimeout = autoTimeout;
+    }, delay);
+
+    window._reactT = t;
+
+    window.reactBuzz = function(side) {
+      if (!waiting) {
+        showToast(`😅 Zu früh! ${playerName(side)} verliert diese Runde!`);
+        clearTimeout(window._reactT);
+        buzzed = true;
+        scores[side === 'left' ? 'right' : 'left'] += 1; // Other player gets point
+        round++;
+        if (round < totalRounds) setTimeout(renderReaction, 1500);
+        else endReaction();
+        return;
+      }
+      if (buzzed) return;
+      buzzed = true;
+      clearTimeout(window._reactAutoTimeout);
+      const rt = Date.now() - startTime;
+      scores[side === 'left' ? 'left' : 'right']++;
+      document.getElementById('buzz-' + side).classList.add('buzzing');
+      showToast(`⚡ ${playerName(side)} — ${rt}ms Reaktionszeit!`);
+      round++;
+      if (round < totalRounds) setTimeout(renderReaction, 1500);
+      else endReaction();
+    };
+  }
+
+  function endReaction() {
+    const winSide = scores.left > scores.right ? 'left' : scores.right > scores.left ? 'right' : null;
+    if (winSide) awardPoints(winSide, game.points);
+    else { awardPoints('left', Math.floor(game.points/2)); awardPoints('right', Math.floor(game.points/2)); }
+    showResult(
+      winSide ? `⚡ ${playerName(winSide)} hat die schnellsten Finger!` : '🤝 Unentschieden!',
+      winSide ? game.points : Math.floor(game.points/2), winSide, game.points
+    );
+  }
+
+  renderReaction();
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: MEMORY SPOT
+// ═══════════════════════════════════════════════════
+function playMemorySpot() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  let phase = 'show'; // show -> left_guess -> right_guess -> result
+  let targetX = 20 + Math.random() * 60; // % of container
+  let targetY = 20 + Math.random() * 60;
+  let leftGuess = null;
+  let rightGuess = null;
+  let currentGuesser = 'left';
+
+  const emojis = ['🏠','🌟','🦊','🍎','🎸','🚗','🌈','⚓','🎭','🔮'];
+  const targetEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+  function dist(g, tx, ty) {
+    if (!g) return 999;
+    const dx = g.x - tx;
+    const dy = g.y - ty;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+
+  function renderShow() {
+    gc.innerHTML = `
+      ${gameHeader(game)}
+      <div class="section-title" style="font-size:1.5rem;">🎯 WO WAR DAS?</div>
+      <div class="show-target-msg">Merkt euch die Position von <strong>${targetEmoji}</strong>! Gleich ist es weg!</div>
+      <div class="memory-grid-area" id="mem-area">
+        <div class="memory-marker" id="target-marker" style="left:${targetX}%; top:${targetY}%; width:50px; height:50px; font-size:1.8rem; background:transparent; border:3px solid var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.8);">${targetEmoji}</div>
+      </div>
+      <div id="countdown-show" style="font-family:'Bangers',cursive; font-size:3rem; color:var(--gold); text-align:center; margin-top:10px;">5</div>
+    `;
+    let c = 5;
+    let ci = setInterval(() => {
+      c--;
+      const el = document.getElementById('countdown-show');
+      if (el) el.textContent = c || '⚡';
+      if (c <= 0) {
+        clearInterval(ci);
+        renderGuess();
+      }
+    }, 1000);
+  }
+
+  function renderGuess() {
+    currentGuesser = 'left';
+    gc.innerHTML = `
+      ${gameHeader(game)}
+      <div class="section-title" style="font-size:1.5rem;">🎯 WO WAR ${targetEmoji}?</div>
+      <div class="show-target-msg" id="guess-instruction">⭐ ${state.birthdayKid} — klicke wo du denkst, dass es war!</div>
+      <div class="memory-grid-area" id="mem-area" style="cursor:crosshair;">
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.15; font-size:5rem; pointer-events:none;">❓</div>
+      </div>
+      <div id="guess-markers"></div>
+    `;
+
+    document.getElementById('mem-area').onclick = function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      if (currentGuesser === 'left') {
+        leftGuess = { x, y };
+        // Show left marker
+        const m = document.createElement('div');
+        m.className = 'memory-marker';
+        m.style.left = x + '%';
+        m.style.top = y + '%';
+        m.style.background = '#E8003D';
+        m.textContent = '🔴';
+        this.appendChild(m);
+        currentGuesser = 'right';
+        showToast(`✅ ${state.birthdayKid} hat markiert!`);
+        document.getElementById('guess-instruction').textContent = `⚔️ ${state.challenger} — jetzt du!`;
+      } else if (currentGuesser === 'right') {
+        rightGuess = { x, y };
+        const m = document.createElement('div');
+        m.className = 'memory-marker';
+        m.style.left = x + '%';
+        m.style.top = y + '%';
+        m.style.background = '#0066FF';
+        m.textContent = '🔵';
+        this.appendChild(m);
+        currentGuesser = 'done';
+        this.style.pointerEvents = 'none';
+        showToast(`✅ ${state.challenger} hat markiert!`);
+        setTimeout(revealResult, 700);
+      }
+    };
+  }
+
+  function revealResult() {
+    const area = document.getElementById('mem-area');
+    if (area) {
+      area.style.pointerEvents = 'none';
+      // Show correct
+      const correct = document.createElement('div');
+      correct.className = 'correct-marker';
+      correct.style.left = targetX + '%';
+      correct.style.top = targetY + '%';
+      correct.style.width = '36px';
+      correct.style.height = '36px';
+      correct.style.fontSize = '1.2rem';
+      correct.style.display = 'flex';
+      correct.style.alignItems = 'center';
+      correct.style.justifyContent = 'center';
+      correct.innerHTML = `<span>${targetEmoji}</span>`;
+      area.appendChild(correct);
+    }
+
+    const dl = dist(leftGuess, targetX, targetY);
+    const dr = dist(rightGuess, targetX, targetY);
+    const maxDist = 50;
+    const lPts = Math.round(game.points * Math.max(0, 1 - dl / maxDist));
+    const rPts = Math.round(game.points * Math.max(0, 1 - dr / maxDist));
+
+    awardPoints('left', lPts);
+    awardPoints('right', rPts);
+
+    const winSide = lPts > rPts ? 'left' : rPts > lPts ? 'right' : null;
+
+    setTimeout(() => {
+      showResult(
+        winSide
+          ? `🎯 ${playerName(winSide)} war näher dran!`
+          : '🤝 Beide gleichauf!',
+        Math.max(lPts, rPts), winSide, game.points,
+        `🔴 ${state.birthdayKid}: ${lPts.toFixed(0)} Pkt (Abstand: ${dl.toFixed(1)}%) | 🔵 ${state.challenger}: ${rPts.toFixed(0)} Pkt (Abstand: ${dr.toFixed(1)}%)`
+      );
+    }, 2000);
+  }
+
+  renderShow();
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: WORD CHAIN
+// ═══════════════════════════════════════════════════
+const wordChainCategories = [
+  { name: 'Tiere 🐾', examples: ['Hund', 'Katze', 'Löwe'] },
+  { name: 'Länder 🌍', examples: ['Deutschland', 'Spanien', 'Japan'] },
+  { name: 'Essen 🍕', examples: ['Pizza', 'Spaghetti', 'Burger'] },
+  { name: 'Sportarten ⚽', examples: ['Fußball', 'Tennis', 'Schwimmen'] },
+  { name: 'Filme 🎬', examples: ['Avatar', 'Titanic', 'Matrix'] },
+];
+
+function playWordChain() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  const pool = [...state.customQuestions.words, ...wordChainCategories];
+  const cat = pool[Math.floor(Math.random() * pool.length)];
+  let timeLeft = 45;
+  let words = [];
+  let currentSide = 'left';
+  let interval;
+  let lastWord = '';
+
+  gc.innerHTML = `
+    ${gameHeader(game)}
+    <div class="section-title" style="font-size:1.5rem;">🔤 WÖRTER-STAFFEL</div>
+    <div class="card mw600" style="text-align:center; margin:10px 0 20px; padding:20px;">
+      <div style="font-size:0.8rem; opacity:0.5; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Kategorie</div>
+      <div style="font-family:'Bangers',cursive; font-size:2.5rem; letter-spacing:3px; color:var(--gold);">${cat.name}</div>
+      <div style="font-size:0.85rem; opacity:0.5; margin-top:8px;">z.B.: ${cat.examples.join(', ')}...</div>
+    </div>`;
+  broadcast('display', { type: 'word_category', catName: cat.name, examples: cat.examples });
+  gc.innerHTML += `
+    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="wc-timer" style="width:100%"></div></div>
+    <div id="wc-clock" style="font-family:'Bangers',cursive; font-size:2.5rem; color:var(--gold); text-align:center;">45</div>
+    <div class="card mw600" style="margin:10px 0; padding:16px; max-height:120px; overflow-y:auto; background:rgba(0,0,0,0.3);">
+      <div id="word-list" style="font-family:'Nunito',sans-serif; font-size:0.9rem; opacity:0.7; line-height:1.8;"></div>
+    </div>
+    <div id="wc-input-area" class="mw600">
+      <div style="font-family:'Fredoka One',cursive; color:var(--cyan); text-align:center; margin-bottom:10px;" id="wc-turn">⭐ ${state.birthdayKid} beginnt!</div>
+      <div style="display:flex; gap:10px;">
+        <input class="input-field" id="wc-input" placeholder="Wort eingeben..." autocomplete="off" style="flex:1;">
+        <button class="btn btn-cyan" onclick="submitWord()" style="white-space:nowrap;">➕</button>
+      </div>
+    </div>
+    <button class="btn btn-primary mt20" onclick="endWordChain()">⏹️ Spiel beenden & auswerten</button>
+  `;
+
+  document.getElementById('wc-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitWord(); });
+
+  window.submitWord = function() {
+    const inp = document.getElementById('wc-input');
+    const word = inp.value.trim();
+    if (!word) return;
+    if (words.map(w => w.text.toLowerCase()).includes(word.toLowerCase())) {
+      showToast('❗ Dieses Wort wurde schon genannt!');
+      inp.value = '';
+      return;
+    }
+    words.push({ text: word, side: currentSide });
+    document.getElementById('word-list').innerHTML = words.map(w =>
+      `<span style="color:${w.side==='left'?'#ff6b6b':'#6bb5ff'}">${w.side==='left'?'🔴':'🔵'} ${w.text}</span> `
+    ).join('');
+    inp.value = '';
+    inp.focus();
+    currentSide = currentSide === 'left' ? 'right' : 'left';
+    document.getElementById('wc-turn').textContent = `${currentSide==='left'?'⭐ '+state.birthdayKid:'⚔️ '+state.challenger} ist dran!`;
+  };
+
+  interval = setInterval(() => {
+    timeLeft--;
+    const pct = timeLeft / 45;
+    const tb = document.getElementById('wc-timer');
+    const cl = document.getElementById('wc-clock');
+    if (tb) { tb.style.width = (pct*100)+'%'; if (pct < 0.3) tb.classList.add('urgent'); }
+    if (cl) cl.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      endWordChain();
+    }
+  }, 1000);
+
+  window.endWordChain = function() {
+    clearInterval(interval);
+    const lw = words.filter(w => w.side === 'left').length;
+    const rw = words.filter(w => w.side === 'right').length;
+    const total = words.length;
+    const lPts = Math.round(game.points * lw / Math.max(1, total));
+    const rPts = Math.round(game.points * rw / Math.max(1, total));
+    const winSide = lw > rw ? 'left' : rw > lw ? 'right' : null;
+    if (winSide) awardPoints(winSide, game.points);
+    else { awardPoints('left', Math.floor(game.points/2)); awardPoints('right', Math.floor(game.points/2)); }
+    showResult(
+      winSide ? `🔤 ${playerName(winSide)} hatte mehr Ideen!` : '🤝 Gleichstand!',
+      winSide ? game.points : Math.floor(game.points/2), winSide, game.points,
+      `${words.length} Wörter insgesamt | 🔴 ${state.birthdayKid}: ${lw} | 🔵 ${state.challenger}: ${rw}`
+    );
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: NUMBER GUESS
+// ═══════════════════════════════════════════════════
+const numberGuesses = [
+  { q: "Wie viele Einwohner hat Berlin (in Millionen × 10)?", a: 36, unit: " (≈3,6 Mio)" },
+  { q: "Wie viele Zähne hat ein gesunder Erwachsener?", a: 32, unit: "" },
+  { q: "Wie schnell fliegt ein Gepard (km/h)?", a: 112, unit: " km/h" },
+  { q: "In welchem Jahr wurde die Titanic gebaut (19xx)?", a: 1912, unit: "" },
+  { q: "Wie viele Knochen hat der menschliche Körper?", a: 206, unit: "" },
+  { q: "Wie viele Kilometer ist die Chinesische Mauer lang?", a: 21196, unit: " km" },
+];
+
+function playNumberGuess() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  const pool = [...state.customQuestions.numbers, ...numberGuesses];
+  const q = pool[Math.floor(Math.random() * pool.length)];
+
+  gc.innerHTML = `
+    ${gameHeader(game)}
+    <div class="section-title" style="font-size:1.5rem;">🔢 ZAHLEN-DUELL</div>
+    <div class="card mw600" style="text-align:center; margin:16px 0 20px; padding:24px;">
+      <div style="font-size:0.8rem; opacity:0.5; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px;">Schätzt die Zahl!</div>
+      <div class="quiz-question">${q.q}</div>
+    </div>
+    <div class="player-select-grid mw600">
+      <div class="player-select-card">
+        <div class="player-label">⭐ ${state.birthdayKid}</div>
+        <input class="input-field" id="num-left" placeholder="Deine Schätzung..." type="number" style="text-align:center; font-size:1.5rem;">
+      </div>
+      <div class="player-select-card">
+        <div class="player-label">⚔️ ${state.challenger}</div>
+        <input class="input-field" id="num-right" placeholder="Deine Schätzung..." type="number" style="text-align:center; font-size:1.5rem;">
+      </div>
+    </div>
+    <button class="btn btn-gold mt20 btn-huge" onclick="checkNumbers()">🔍 AUFLÖSEN!</button>
+    <div id="number-result"></div>
+  `;
+  broadcast('display', { type: 'number_question', question: q.q });
+
+  window.checkNumbers = function() {
+    const l = parseFloat(document.getElementById('num-left').value);
+    const r = parseFloat(document.getElementById('num-right').value);
+    if (isNaN(l) || isNaN(r)) { showToast('❗ Beide müssen eine Zahl eingeben!'); return; }
+    const dl = Math.abs(l - q.a);
+    const dr = Math.abs(r - q.a);
+    const winSide = dl < dr ? 'left' : dr < dl ? 'right' : null;
+    awardPoints(winSide || 'left', winSide ? game.points : Math.floor(game.points/2));
+    if (!winSide) awardPoints('right', Math.floor(game.points/2));
+    showResult(
+      winSide ? `🎯 ${playerName(winSide)} war näher dran!` : '🤝 Gleichstand!',
+      winSide ? game.points : Math.floor(game.points/2), winSide, game.points,
+      `Richtige Antwort: ${q.a}${q.unit} | 🔴 ${state.birthdayKid}: ${l} (Abstand: ${dl}) | 🔵 ${state.challenger}: ${r} (Abstand: ${dr})`
+    );
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: PHYSICAL CHALLENGE
+// ═══════════════════════════════════════════════════
+const physicalChallenges = [
+  { name: "Liegestütze-Battle!", desc: "Wer schafft mehr Liegestütze in 30 Sekunden?", icon: "💪" },
+  { name: "Balanciere auf einem Bein!", desc: "Wer hält länger auf einem Bein die Balance?", icon: "🦩" },
+  { name: "Papierkorb-Wurf!", desc: "Wer trifft öfter von 5 Metern den Papierkorb?", icon: "🏀" },
+  { name: "Zungenbrecher-Sprint!", desc: "Wer sagt 'Fischers Fritz fischt frische Fische' 5x am schnellsten korrekt?", icon: "🗣️" },
+  { name: "Luftballon-Challenge!", desc: "Wer hält einen Luftballon ohne Hände in der Luft?", icon: "🎈" },
+  { name: "Rückwärts-Countdown!", desc: "Wer zählt von 50 rückwärts in kürzerer Zeit fehlerfrei?", icon: "⏱️" },
+];
+
+function playPhysicalChallenge() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  const pool = [...state.customQuestions.physical, ...physicalChallenges];
+  const ch = pool[Math.floor(Math.random() * pool.length)];
+  let timeLeft = 30;
+  let interval;
+  let running = false;
+
+  gc.innerHTML = `
+    ${gameHeader(game)}
+    <div class="section-title" style="font-size:1.5rem;">🏃 SPORT-CHALLENGE</div>
+    <div class="card mw600" style="text-align:center; margin:16px 0 20px; padding:28px;">
+      <div style="font-size:3rem; margin-bottom:12px;">${ch.icon}</div>
+      <div style="font-family:'Bangers',cursive; font-size:2rem; color:var(--gold); letter-spacing:2px; margin-bottom:12px;">${ch.name}</div>
+      <div style="font-size:1rem; color:rgba(255,255,255,0.75); line-height:1.5;">${ch.desc}</div>
+    </div>
+    <div class="timer-bar-wrap" style="max-width:400px;"><div class="timer-bar-fill" id="sport-timer" style="width:100%"></div></div>
+    <div class="countdown-big" id="sport-clock">30</div>
+    <div class="flex-row mt20">
+      <button class="btn btn-gold btn-huge" id="sport-start-btn" onclick="startSportTimer()">▶️ START!</button>
+    </div>
+    <div id="sport-winner-area" class="mw600" style="display:none; margin-top:20px;">
+      <div class="section-sub" style="margin-bottom:16px;">Wer hat gewonnen?</div>
+      <div class="flex-row">
+        <button class="btn btn-primary" style="font-size:1.1rem; padding:16px 30px;" onclick="endSport('left')">⭐ ${state.birthdayKid}</button>
+        <button class="btn btn-cyan" style="font-size:1.1rem; padding:16px 30px;" onclick="endSport('right')">⚔️ ${state.challenger}</button>
+        <button class="btn btn-secondary btn-small" onclick="endSport(null)">🤝 Unentschieden</button>
+      </div>
+    </div>
+  `;
+  broadcast('display', { type: 'physical', name: ch.name, desc: ch.desc, icon: ch.icon });
+
+  window.startSportTimer = function() {
+    if (running) return;
+    running = true;
+    document.getElementById('sport-start-btn').disabled = true;
+    document.getElementById('sport-start-btn').style.opacity = '0.4';
+    interval = setInterval(() => {
+      timeLeft--;
+      const pct = timeLeft / 30;
+      const tb = document.getElementById('sport-timer');
+      const cl = document.getElementById('sport-clock');
+      if (tb) { tb.style.width = (pct*100)+'%'; if (pct < 0.3) tb.classList.add('urgent'); }
+      if (cl) cl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        cl.textContent = '⏱️';
+        document.getElementById('sport-winner-area').style.display = 'flex';
+        showToast('Zeit! Wer hat gewonnen?');
+      }
+    }, 1000);
+  };
+
+  window.endSport = function(side) {
+    if (side) awardPoints(side, game.points);
+    else { awardPoints('left', Math.floor(game.points/2)); awardPoints('right', Math.floor(game.points/2)); }
+    showResult(
+      side ? `🏆 ${playerName(side)} gewinnt die Challenge!` : '🤝 Unentschieden!',
+      side ? game.points : Math.floor(game.points/2), side, game.points
+    );
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: EMOJI QUIZ
+// ═══════════════════════════════════════════════════
+const emojiQuizzes = [
+  { emojis: "🦁👑", answer: "König der Löwen", hint: "Disney Film" },
+  { emojis: "🕷️👦", answer: "Spider-Man", hint: "Marvel Superheld" },
+  { emojis: "🚢💔❄️", answer: "Titanic", hint: "Katastrophenfilm" },
+  { emojis: "🧊👸⛄", answer: "Die Eiskönigin (Frozen)", hint: "Disney" },
+  { emojis: "🎸🤘👦", answer: "School of Rock", hint: "Film mit Musik" },
+  { emojis: "🌊🤿🐠🐟", answer: "Findet Nemo", hint: "Animationsfilm" },
+  { emojis: "🦸‍♂️🔨⚡", answer: "Thor", hint: "Marvel Superheld" },
+  { emojis: "🌹👹🏰", answer: "Die Schöne und das Biest", hint: "Märchen" },
+];
+
+function playEmojiQuiz() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  const pool = [...state.customQuestions.emoji, ...emojiQuizzes].sort(() => Math.random() - 0.5);
+  const questions = pool.slice(0, 4);
+  let qIndex = 0;
+  let scores = { left: 0, right: 0 };
+  let buzzed = false;
+
+  function renderEmojiQ() {
+    if (qIndex >= questions.length) {
+      const winSide = scores.left > scores.right ? 'left' : scores.right > scores.left ? 'right' : null;
+      if (winSide) awardPoints(winSide, game.points);
+      else { awardPoints('left', Math.floor(game.points/2)); awardPoints('right', Math.floor(game.points/2)); }
+      showResult(
+        winSide ? `🏆 ${playerName(winSide)} kennt die Emojis!` : '🤝 Gleichstand!',
+        winSide ? game.points : Math.floor(game.points/2), winSide, game.points
+      );
+      return;
+    }
+    const q = questions[qIndex];
+    buzzed = false;
+    broadcast('display', { type: 'emoji_question', emojis: q.emojis, hint: q.hint });
+    gc.innerHTML = `
+      ${gameHeader(game)}
+      <div class="round-badge">Emoji-Rätsel ${qIndex+1} von ${questions.length} 🤩</div>
+      <div class="card mw600" style="text-align:center; padding:30px; margin:10px 0 16px;">
+        <div style="font-size:0.8rem; opacity:0.5; letter-spacing:2px; text-transform:uppercase; margin-bottom:12px;">Was bedeutet das? (${q.hint})</div>
+        <div style="font-size:clamp(3rem, 12vw, 5rem); margin:10px 0;">${q.emojis}</div>
+      </div>
+      <div style="font-family:'Fredoka One',cursive; color:var(--cyan); font-size:0.95rem; margin-bottom:10px; text-align:center;">
+        🔴 ${state.birthdayKid}: ${scores.left} | 🔵 ${state.challenger}: ${scores.right}
+      </div>
+      ${buzzAreaHTML('emojiiBuzz')}
+      <div id="emoji-answer-area"></div>
+    `;
+
+    window.emojiiBuzz = function(side) {
+      if (buzzed) return;
+      buzzed = true;
+      document.getElementById('emoji-answer-area').innerHTML = `
+        <div class="result-msg draw" style="margin:16px 0; font-size:1.1rem;">
+          ⚡ ${playerName(side)} antwortet!
+        </div>
+        <div class="flex-row">
+          <button class="btn btn-primary" onclick="checkEmoji('${side}', true)">✅ Richtig geraten!</button>
+          <button class="btn btn-secondary" onclick="checkEmoji('${side}', false)">❌ Falsch</button>
+        </div>
+        <div style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-top:10px; text-align:center;">Moderator entscheidet &mdash; Antwort: ${q.answer}</div>
+      `;
+    };
+
+    window.checkEmoji = function(side, correct) {
+      if (correct) { scores[side==='left'?'left':'right']++; showToast(`🎉 +1 für ${playerName(side)}!`); }
+      else showToast(`❌ Die Antwort war: ${q.answer}`);
+      qIndex++;
+      setTimeout(renderEmojiQ, 1800);
+    };
+  }
+
+  renderEmojiQ();
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME: TRUE OR FALSE
+// ═══════════════════════════════════════════════════
+const trueFalseQuestions = [
+  { q: "Ein Tag auf dem Planeten Venus ist länger als ein Jahr auf der Venus.", a: true },
+  { q: "Oktopusse haben drei Herzen.", a: true },
+  { q: "Die Große Mauer Chinas ist vom Weltraum aus mit bloßem Auge sichtbar.", a: false },
+  { q: "Honig verdirbt nie – sogar 3000 Jahre alter Honig ist noch essbar.", a: true },
+  { q: "Bananen wachsen an Bäumen.", a: false },
+  { q: "Das Herz eines Blauwals ist etwa so groß wie ein kleines Auto.", a: true },
+  { q: "Ein Blitz kann nicht zweimal am selben Ort einschlagen.", a: false },
+  { q: "Menschen und Schimpansen teilen ~98,7% ihrer DNA.", a: true },
+];
+
+function playTrueFalse() {
+  const game = state.currentGame;
+  const gc = document.getElementById('game-content');
+  const pool = [...state.customQuestions.trueFalse, ...trueFalseQuestions].sort(() => Math.random() - 0.5);
+  const questions = pool.slice(0, 5);
+  let qIndex = 0;
+  let scores = { left: 0, right: 0 };
+
+  function renderTFQ() {
+    if (qIndex >= questions.length) {
+      const winSide = scores.left > scores.right ? 'left' : scores.right > scores.left ? 'right' : null;
+      if (winSide) awardPoints(winSide, game.points);
+      else { awardPoints('left', Math.floor(game.points/2)); awardPoints('right', Math.floor(game.points/2)); }
+      showResult(
+        winSide ? `✅ ${playerName(winSide)} hat das bessere Bauchgefühl!` : '🤝 Gleichstand!',
+        winSide ? game.points : Math.floor(game.points/2), winSide, game.points
+      );
+      return;
+    }
+    const q = questions[qIndex];
+    let leftChoice = null, rightChoice = null;
+    broadcast('display', { type: 'tf_question', question: q.q });
+
+    gc.innerHTML = `
+      ${gameHeader(game)}
+      <div class="round-badge">Wahr oder Falsch? ${qIndex+1} von ${questions.length}</div>
+      <div class="card mw600" style="text-align:center; padding:28px; margin:10px 0 20px;">
+        <div class="quiz-question">${q.q}</div>
+      </div>
+      <div style="font-family:'Fredoka One',cursive; color:rgba(255,255,255,0.5); font-size:0.95rem; margin-bottom:4px; text-align:center;">
+        🔴 ${state.birthdayKid}: ${scores.left} | 🔵 ${state.challenger}: ${scores.right}
+      </div>
+      <div class="player-select-grid mw600" style="margin:16px 0;">
+        <div class="player-select-card" style="text-align:center;">
+          <div class="player-label">⭐ ${state.birthdayKid}</div>
+          <div class="sport-choice-grid" style="grid-template-columns:1fr 1fr; gap:10px; max-width:none; margin:10px 0;">
+            <div class="sport-choice" id="tf-l-true" onclick="tfChoose('left','true')"><span class="icon">✅</span>Wahr</div>
+            <div class="sport-choice" id="tf-l-false" onclick="tfChoose('left','false')"><span class="icon">❌</span>Falsch</div>
+          </div>
+        </div>
+        <div class="player-select-card" style="text-align:center;">
+          <div class="player-label">⚔️ ${state.challenger}</div>
+          <div class="sport-choice-grid" style="grid-template-columns:1fr 1fr; gap:10px; max-width:none; margin:10px 0;">
+            <div class="sport-choice" id="tf-r-true" onclick="tfChoose('right','true')"><span class="icon">✅</span>Wahr</div>
+            <div class="sport-choice" id="tf-r-false" onclick="tfChoose('right','false')"><span class="icon">❌</span>Falsch</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-gold" id="tf-reveal-btn" onclick="revealTF()" style="display:none;">🔍 AUFLÖSEN</button>
+    `;
+
+    window.tfChoose = function(side, val) {
+      if (side === 'left') {
+        leftChoice = val === 'true';
+        document.getElementById('tf-l-true').classList.toggle('chosen', val==='true');
+        document.getElementById('tf-l-false').classList.toggle('chosen', val==='false');
+        ['tf-l-true','tf-l-false'].forEach(id => document.getElementById(id).onclick = null);
+      } else {
+        rightChoice = val === 'true';
+        document.getElementById('tf-r-true').classList.toggle('chosen', val==='true');
+        document.getElementById('tf-r-false').classList.toggle('chosen', val==='false');
+        ['tf-r-true','tf-r-false'].forEach(id => document.getElementById(id).onclick = null);
+      }
+      if (leftChoice !== null && rightChoice !== null) {
+        document.getElementById('tf-reveal-btn').style.display = 'inline-block';
+      }
+    };
+
+    window.revealTF = function() {
+      if (leftChoice === q.a) scores.left++;
+      if (rightChoice === q.a) scores.right++;
+      showToast(`${q.a ? '✅ WAHR' : '❌ FALSCH'} war die richtige Antwort!`);
+      qIndex++;
+      setTimeout(renderTFQ, 2000);
+    };
+  }
+
+  renderTFQ();
+}
+
+// ═══════════════════════════════════════════════════
+//  SHOW RESULT
+// ═══════════════════════════════════════════════════
+function showResult(title, pts, winSide, maxPts, extra) {
+  state.playedGames.push(state.currentGame.id);
+  window.__activeBuzzHandler = null; // clear buzz handler
+  broadcast('game_state', buildBroadcastState({
+    phase: 'result',
+    gameId: state.currentGame.id,
+    gameName: state.currentGame.name,
+    gameIcon: state.currentGame.icon,
+    resultTitle: title,
+    resultPts: pts,
+    resultWinSide: winSide,
+    displayContent: { type: 'result', title, pts, winSide }
+  }));
+  const gc = document.getElementById('result-content');
+  showScreen('result');
+
+  const isWin = winSide !== null;
+  const icon = isWin ? (winSide === 'left' ? '⭐' : '⚔️') : '🤝';
+  const cls = isWin ? 'win' : 'draw';
+
+  gc.innerHTML = `
+    <div class="jester-icon" style="font-size:3rem; margin-top:20px;">${isWin ? '🏆' : '🤝'}</div>
+    <div class="result-msg ${cls}" style="margin:16px 0; font-size:1.5rem; width:100%;">
+      ${icon} ${title}
+    </div>
+    ${pts > 0 ? `
+      <div style="font-family:'Bangers',cursive; font-size:4rem; color:var(--gold); letter-spacing:4px; filter:drop-shadow(0 0 30px rgba(255,215,0,0.6));">+${pts} PUNKTE!</div>
+    ` : ''}
+    ${extra ? `<div style="font-size:0.85rem; opacity:0.5; margin:8px 0; text-align:center; max-width:500px;">${extra}</div>` : ''}
+    <div class="divider"></div>
+    <div class="scoreboard" style="margin:14px 0;">${scoreboardHTML()}</div>
+    <div class="divider"></div>
+    <div style="font-family:'Fredoka One',cursive; color:var(--gold); font-size:1.1rem; margin:10px 0; text-align:center;">
+      Gespielt: ${state.playedGames.length} / ${state.maxGames}
+    </div>
+    ${state.playedGames.length >= state.maxGames ? `
+      <button class="btn btn-gold btn-huge mt20" onclick="showFinalResult()">🏆 ENDAUSWERTUNG!</button>
+    ` : `
+      <button class="btn btn-primary btn-huge mt20" onclick="backToSelect()">🎮 NÄCHSTES SPIEL</button>
+    `}
+  `;
+
+  // Points popup
+  if (pts > 0 && winSide) {
+    spawnPointsPopup('+' + pts, winSide === 'left' ? '#ff6b6b' : '#6bb5ff');
+  }
+  spawnConfetti();
+}
+
+function backToSelect() {
+  renderGameSelect();
+  showScreen('gameselect');
+}
+
+function showFinalResult() {
+  const allP = allPlayersList();
+  // Find winner by allScores
+  let topScore = -1;
+  let winner = '';
+  allP.forEach(p => {
+    const s = state.allScores[p] ?? 0;
+    if (s > topScore) { topScore = s; winner = p; }
+  });
+  const topCount = allP.filter(p => (state.allScores[p] ?? 0) === topScore).length;
+  const isDraw = topCount > 1;
+
+  document.getElementById('winner-name-display').textContent = isDraw ? '🤝 UNENTSCHIEDEN' : winner;
+  document.getElementById('winner-subtitle').textContent = isDraw
+    ? `Alle Sieger mit ${topScore} Punkten!`
+    : winner === state.birthdayKid
+      ? `Das Geburtstagskind ist unbesiegbar! 🎂`
+      : `${winner} hat das Geburtstagskind geschlagen! 😱`;
+
+  const icons = ['⭐','⚔️','🔥','💥','🎯','🌟'];
+  const sorted = [...allP].sort((a,b) => (state.allScores[b]??0) - (state.allScores[a]??0));
+  document.getElementById('final-scores').innerHTML = `
+    <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; width:100%;">
+      ${sorted.map((p, rank) => {
+        const score = state.allScores[p] ?? 0;
+        const isWinner = score === topScore;
+        const icon = icons[allP.indexOf(p)];
+        return `<div class="score-card" style="${isWinner ? 'border-color:var(--gold);box-shadow:0 0 30px rgba(255,215,0,0.3)' : ''}">
+          <div class="score-name">${icon} ${p}</div>
+          <div class="score-value">${score}</div>
+          <div class="score-label">${rank===0?'🏆 Platz 1':'Platz '+(rank+1)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+
+  showScreen('winner');
+  for (let i = 0; i < 5; i++) setTimeout(spawnConfetti, i * 400);
+}
+
+function resetGame() {
+  state = {
+    birthdayKid: '', challenger: '', photoUrl: '',
+    scores: { birthday: 0, challenger: 0 },
+    playedGames: [], maxGames: 5, currentGame: null,
+    currentPlayers: { left: '', right: '' },
+    players: [], allScores: {}, currentMatchup: { leftIdx: 0, rightIdx: 1 },
+    customQuestions: {
+      quiz: [], birthday: [], trueFalse: [], numbers: [],
+      emoji: [], words: [], physical: []
+    }
+  };
+  document.getElementById('birthday-name').value = '';
+  document.getElementById('photo-upload-url').value = '';
+  showScreen('welcome');
+}
+
+// ═══════════════════════════════════════════════════
+//  VISUAL FX
+// ═══════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function spawnPointsPopup(text, color) {
+  const el = document.createElement('div');
+  el.className = 'points-popup';
+  el.textContent = text;
+  el.style.color = color || 'var(--gold)';
+  el.style.left = (20 + Math.random() * 60) + '%';
+  el.style.top = '60%';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function spawnConfetti() {
+  const colors = ['#FFD700','#FF6B00','#E8003D','#00E5FF','#00FF88','#6C00FF','#FF69B4','#fff'];
+  for (let i = 0; i < 30; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (6 + Math.random() * 10) + 'px';
+    el.style.height = (6 + Math.random() * 10) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+
+// Stars
+(function generateStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dur:${2+Math.random()*4}s;
+      --delay:${Math.random()*3}s;
+    `;
+    container.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>

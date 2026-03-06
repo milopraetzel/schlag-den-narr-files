@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schlag den Narr — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --gold: #E8B400;
+    --blue: #0055CC;
+    --blue-dark: #003388;
+    --red: #CC1100;
+    --dark: #080C14;
+    --panel: #0D1422;
+    --panel2: #111926;
+    --border: rgba(255,255,255,0.12);
+    --text: #E8EAF0;
+    --text-dim: rgba(232,234,240,0.5);
+    --green: #00BB55;
+    --cyan: #00AADD;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 0%, rgba(0,55,150,0.3) 0%, transparent 65%),
+      radial-gradient(ellipse 80% 40% at 50% 100%, rgba(0,30,80,0.5) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── TOP BAR ── */
+  #top-bar {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,12,20,0.8);
+    backdrop-filter: blur(10px);
+  }
+  #top-bar .show-title {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: 1.6rem; letter-spacing: 6px; color: var(--gold);
+    text-transform: uppercase;
+  }
+  #top-bar .game-badge {
+    font-family: 'Oswald', sans-serif; font-weight: 600;
+    font-size: 1rem; letter-spacing: 3px; color: var(--text-dim);
+    text-transform: uppercase;
+    background: var(--blue-dark); padding: 6px 18px; border-radius: 3px;
+  }
+  #top-bar .progress {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 0.9rem; color: var(--text-dim); letter-spacing: 2px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  #main {
+    position: relative; z-index: 1;
+    flex: 1; display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* ── CENTER CONTENT ── */
+  #center {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 40px;
+    border-right: 1px solid var(--border);
+  }
+
+  /* Waiting state */
+  #waiting {
+    text-align: center;
+  }
+  #waiting .big-icon { font-size: 5rem; margin-bottom: 20px; }
+  #waiting h1 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 3rem; color: var(--gold); letter-spacing: 6px; }
+  #waiting p { color: var(--text-dim); margin-top: 12px; font-size: 1.1rem; letter-spacing: 2px; }
+
+  /* Photo reveal */
+  #photo-display {
+    display: none;
+    flex-direction: column; align-items: center; width: 100%; max-width: 700px;
+  }
+  #photo-display .game-label {
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.4rem;
+    letter-spacing: 4px; color: var(--gold); margin-bottom: 20px; text-transform: uppercase;
+  }
+  #photo-img-container {
+    width: 100%; max-width: 560px; aspect-ratio: 1;
+    border-radius: 8px; overflow: hidden;
+    border: 2px solid var(--border);
+    position: relative;
+    background: var(--panel2);
+  }
+  #photo-img-container .dash-photo {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: filter 0.8s ease;
+  }
+  #photo-img-container .dash-emoji {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8rem;
+    transition: filter 0.8s ease;
+  }
+  .timer-bar-wrap {
+    width: 100%; max-width: 560px; height: 8px;
+    background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin: 16px auto 0;
+  }
+  .timer-bar-fill {
+    height: 100%; border-radius: 2px; transition: width 0.9s linear;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+  }
+  .timer-bar-fill.urgent { background: linear-gradient(90deg, #CC6600, var(--red)); }
+
+  /* Quiz display */
+  #quiz-display {
+    display: none; flex-direction: column; align-items: center; width: 100%; max-width: 700px;
+  }
+  #quiz-display .question-text {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 700;
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    text-align: center; line-height: 1.3; color: #fff; margin-bottom: 28px;
+    padding: 28px 32px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    border-left: 4px solid var(--blue);
+    width: 100%;
+  }
+  .quiz-opts-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%;
+  }
+  .quiz-opt-dash {
+    background: var(--panel); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px; padding: 18px 20px;
+    font-family: 'Roboto Condensed', sans-serif; font-size: 1.2rem; color: var(--text);
+    transition: all 0.3s;
+  }
+  .quiz-opt-dash .opt-letter {
+    font-family: 'Oswald', sans-serif; font-weight: 700; color: var(--gold);
+    margin-right: 10px;
+  }
+  .quiz-opt-dash.correct { border-color: var(--green); border-left-color: var(--green); color: #6EFFA0; background: rgba(0,187,85,0.08); }
+  .quiz-opt-dash.wrong { border-color: var(--red); border-left-color: var(--red); color: #FF7766; background: rgba(200,0,0,0.08); }
+
+  /* Generic text content */
+  #text-display {
+    display: none; flex-direction: column; align-items: center; width: 100%; max-width: 700px; text-align: center;
+  }
+  #text-display .game-icon { font-size: 4rem; margin-bottom: 16px; }
+  #text-display .game-name {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: clamp(1.8rem, 3vw, 3rem); letter-spacing: 4px; color: var(--gold); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  #text-display .content-text {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: clamp(1.2rem, 2.5vw, 2rem);
+    color: var(--text); line-height: 1.4;
+    background: var(--panel); border: 1px solid var(--border);
+    border-left: 4px solid var(--blue);
+    border-radius: 6px; padding: 24px 28px; width: 100%; text-align: left;
+  }
+
+  /* Result display */
+  #result-display {
+    display: none; flex-direction: column; align-items: center; width: 100%; max-width: 700px; text-align: center;
+  }
+  #result-display .result-icon { font-size: 5rem; margin-bottom: 16px; }
+  #result-display .result-title {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: clamp(1.6rem, 3vw, 2.8rem); letter-spacing: 3px;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 8px;
+  }
+  #result-display .result-pts {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: 4rem; color: #fff; letter-spacing: 4px;
+    text-shadow: 0 0 40px rgba(232,180,0,0.5);
+  }
+
+  /* ── RIGHT SIDEBAR: SCOREBOARD ── */
+  #sidebar {
+    display: flex; flex-direction: column;
+    padding: 28px 24px;
+    background: rgba(8,12,20,0.5);
+    overflow-y: auto;
+  }
+  #sidebar .sb-title {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: 0.8rem; letter-spacing: 4px; color: var(--text-dim);
+    text-transform: uppercase; margin-bottom: 20px;
+    border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  }
+  .sb-player {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.4s;
+  }
+  .sb-player:last-child { border-bottom: none; }
+  .sb-rank {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: 1.1rem; color: var(--text-dim); min-width: 24px; text-align: center;
+  }
+  .sb-rank.first { color: var(--gold); }
+  .sb-icon { font-size: 1.4rem; }
+  .sb-name {
+    flex: 1; font-family: 'Roboto Condensed', sans-serif; font-weight: 700;
+    font-size: 1.1rem; color: var(--text); text-transform: uppercase; letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sb-score {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: 1.8rem; color: #fff; min-width: 50px; text-align: right;
+  }
+  .sb-score-bar-wrap {
+    width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 6px;
+  }
+  .sb-score-bar { height: 4px; border-radius: 2px; background: var(--blue); transition: width 0.6s ease; }
+  .sb-player-row { flex: 1; }
+
+  /* Current matchup */
+  #current-matchup {
+    margin-top: 28px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+  #current-matchup .match-label {
+    font-family: 'Oswald', sans-serif; font-weight: 600;
+    font-size: 0.75rem; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .matchup-row {
+    display: flex; align-items: center; gap: 10px; margin: 8px 0;
+  }
+  .matchup-dot-red { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+  .matchup-dot-blue { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+  .matchup-name { font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 1rem; color: var(--text); }
+
+  /* ── STATUS INDICATOR ── */
+  #status {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    font-family: 'Roboto Condensed', sans-serif; font-size: 0.8rem; letter-spacing: 2px;
+    color: var(--text-dim); background: rgba(8,12,20,0.9); padding: 6px 16px; border-radius: 3px;
+    border: 1px solid var(--border);
+    z-index: 100;
+  }
+  #status.connected { color: var(--green); border-color: rgba(0,187,85,0.3); }
+  #status.disconnected { color: var(--red); border-color: rgba(200,0,0,0.3); }
+
+  /* Buzz flash overlay */
+  #buzz-overlay {
+    display: none; position: fixed; inset: 0; z-index: 50;
+    align-items: center; justify-content: center; pointer-events: none;
+  }
+  #buzz-overlay.show { display: flex; animation: buzzOverlay 1.2s ease-out forwards; }
+  @keyframes buzzOverlay {
+    0% { background: rgba(255,255,255,0.15); }
+    100% { background: transparent; }
+  }
+  #buzz-overlay .buzz-text {
+    font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: clamp(3rem, 8vw, 6rem); letter-spacing: 6px; text-transform: uppercase;
+    animation: buzzTextPop 1.2s ease-out forwards;
+    text-shadow: 0 0 60px currentColor;
+  }
+  @keyframes buzzTextPop {
+    0% { transform: scale(0.5); opacity: 1; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 0; }
+  }
+  .buzz-text.left { color: #FF5555; }
+  .buzz-text.right { color: #5599FF; }
+
+  /* Confetti */
+  .confetti-piece { position: fixed; width: 10px; height: 10px; top: -20px; animation: confettiFall linear forwards; pointer-events: none; z-index: 999; border-radius: 2px; }
+  @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="top-bar">
+  <div class="show-title">🤡 Schlag den Narr</div>
+  <div class="game-badge" id="game-badge">Warte auf Moderator...</div>
+  <div class="progress" id="top-progress">–</div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- CENTER -->
+  <div id="center">
+    <!-- Waiting -->
+    <div id="waiting">
+      <div class="big-icon">🎭</div>
+      <h1>BEREIT</h1>
+      <p>Warte auf den Start...</p>
+    </div>
+
+    <!-- Photo reveal -->
+    <div id="photo-display">
+      <div class="game-label">📸 Wer bin ich?</div>
+      <div id="photo-img-container">
+        <img id="dash-photo-img" class="dash-photo" src="" style="display:none; filter:blur(30px);">
+        <div id="dash-photo-emoji" class="dash-emoji" style="filter:blur(30px);">🎭</div>
+      </div>
+      <div class="timer-bar-wrap"><div class="timer-bar-fill" id="dash-timer-bar" style="width:100%"></div></div>
+    </div>
+
+    <!-- Quiz display -->
+    <div id="quiz-display">
+      <div class="question-text" id="quiz-question-text">–</div>
+      <div class="quiz-opts-grid" id="quiz-opts-grid"></div>
+    </div>
+
+    <!-- Generic text content -->
+    <div id="text-display">
+      <div class="game-icon" id="text-game-icon">🎮</div>
+      <div class="game-name" id="text-game-name">–</div>
+      <div class="content-text" id="text-content">–</div>
+    </div>
+
+    <!-- Result display -->
+    <div id="result-display">
+      <div class="result-icon" id="result-icon">🏆</div>
+      <div class="result-title" id="result-title">–</div>
+      <div class="result-pts" id="result-pts"></div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR SCOREBOARD -->
+  <div id="sidebar">
+    <div class="sb-title">Punktestand</div>
+    <div id="scoreboard-list">
+      <div style="color:var(--text-dim); font-size:0.9rem; text-align:center; margin-top:20px;">Warte auf Spielstart...</div>
+    </div>
+    <div id="current-matchup" style="display:none;">
+      <div class="match-label">Aktuelles Duell</div>
+      <div class="matchup-row">
+        <div class="matchup-dot-red"></div>
+        <div class="matchup-name" id="matchup-left">–</div>
+      </div>
+      <div style="font-family:'Oswald',sans-serif; font-size:0.9rem; color:var(--text-dim); margin:4px 0 4px 24px;">VS</div>
+      <div class="matchup-row">
+        <div class="matchup-dot-blue"></div>
+        <div class="matchup-name" id="matchup-right">–</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Buzz overlay -->
+<div id="buzz-overlay"><span class="buzz-text" id="buzz-text">BUZZ!</span></div>
+
+<!-- Status -->
+<div id="status" class="disconnected">VERBINDE...</div>
+
+<script>
+const SUPA_URL = 'https://iismcfyjlxtslqdbomtj.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc21jZnlqbHh0c2xxZGJvbXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODA2NjEsImV4cCI6MjA4ODM1NjY2MX0.ZYLWzBmIhOyZH43adYeaXvDanzQGcu59WXLcyEzNvu8';
+const ROOM = 'schlag-den-narr-main';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+// ── UI helpers ──
+function showPanel(id) {
+  ['waiting','photo-display','quiz-display','text-display','result-display'].forEach(p => {
+    document.getElementById(p).style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  if (el) { el.style.display = 'flex'; el.style.flexDirection = 'column'; }
+}
+
+function updateScoreboard(allScores, allPlayers) {
+  if (!allScores || !allPlayers) return;
+  const sorted = [...allPlayers].sort((a,b) => (allScores[b]||0) - (allScores[a]||0));
+  const maxScore = Math.max(1, ...sorted.map(p => allScores[p]||0));
+  const icons = ['⭐','⚔️','🔥','💥','🎯','🌟'];
+
+  document.getElementById('scoreboard-list').innerHTML = sorted.map((p, i) => {
+    const score = allScores[p] || 0;
+    const isFirst = i === 0 && score > 0;
+    const origIdx = allPlayers.indexOf(p);
+    return `
+      <div class="sb-player">
+        <div class="sb-rank ${isFirst ? 'first' : ''}">${i+1}</div>
+        <div class="sb-icon">${icons[origIdx] || '👤'}</div>
+        <div class="sb-player-row">
+          <div class="sb-name">${p}</div>
+          <div class="sb-score-bar-wrap">
+            <div class="sb-score-bar" style="width:${Math.round(score/maxScore*100)}%"></div>
+          </div>
+        </div>
+        <div class="sb-score">${score}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showBuzzFlash(side, name) {
+  const overlay = document.getElementById('buzz-overlay');
+  const text = document.getElementById('buzz-text');
+  text.textContent = name.toUpperCase() + ' — BUZZ!';
+  text.className = 'buzz-text ' + side;
+  overlay.classList.remove('show');
+  void overlay.offsetWidth; // reflow
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 1200);
+}
+
+function spawnConfetti() {
+  const colors = ['#E8B400','#0055CC','#CC1100','#00BB55','#fff'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = Math.random() * 0.5 + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+}
+
+// ── Realtime ──
+const channel = sb.channel(ROOM, { config: { broadcast: { self: false } } });
+
+channel.on('broadcast', { event: 'game_state' }, ({ payload }) => {
+  const { phase, gameName, gameIcon, gameId, playerLeft, playerRight,
+          allScores, allPlayers, playedCount, maxGames,
+          resultTitle, resultPts, resultWinSide } = payload;
+
+  // Always update scoreboard
+  updateScoreboard(allScores, allPlayers);
+
+  // Update top bar
+  if (gameName) {
+    document.getElementById('game-badge').textContent = `${gameIcon || ''} ${gameName}`;
+  }
+  if (playedCount !== undefined && maxGames) {
+    document.getElementById('top-progress').textContent = `Spiel ${playedCount + 1} / ${maxGames}`;
+  }
+
+  // Matchup
+  if (playerLeft && playerRight) {
+    document.getElementById('current-matchup').style.display = 'block';
+    document.getElementById('matchup-left').textContent = playerLeft;
+    document.getElementById('matchup-right').textContent = playerRight;
+  }
+
+  if (phase === 'playing' && gameId) {
+    if (gameId === 'photo_reveal') {
+      // Will be handled by 'display' event
+    } else if (gameId === 'quiz_general' || gameId === 'quiz_birthday') {
+      showPanel('quiz-display');
+      document.getElementById('game-badge').textContent = `${gameIcon} ${gameName}`;
+    } else {
+      // Generic: show game name + waiting
+      showPanel('text-display');
+      document.getElementById('text-game-icon').textContent = gameIcon || '🎮';
+      document.getElementById('text-game-name').textContent = gameName || '';
+      document.getElementById('text-content').textContent = 'Spiel läuft...';
+    }
+  }
+
+  if (phase === 'result') {
+    showPanel('result-display');
+    const icon = resultWinSide ? '🏆' : '🤝';
+    document.getElementById('result-icon').textContent = icon;
+    document.getElementById('result-title').textContent = resultTitle || '';
+    document.getElementById('result-pts').textContent = resultPts > 0 ? `+${resultPts} Punkte` : '';
+    if (resultPts > 0) spawnConfetti();
+  }
+});
+
+channel.on('broadcast', { event: 'scores' }, ({ payload }) => {
+  updateScoreboard(payload.allScores, payload.allPlayers);
+});
+
+channel.on('broadcast', { event: 'display' }, ({ payload }) => {
+  const { type } = payload;
+
+  if (type === 'photo_blur') {
+    showPanel('photo-display');
+    document.getElementById('game-badge').textContent = '📸 Wer bin ich?';
+    const imgEl = document.getElementById('dash-photo-img');
+    const emojiEl = document.getElementById('dash-photo-emoji');
+    const blurVal = payload.blurLevel || 0;
+    const blur = `blur(${blurVal}px)`;
+
+    if (payload.photoUrl) {
+      imgEl.src = payload.photoUrl;
+      imgEl.style.display = 'block';
+      imgEl.style.filter = blur;
+      emojiEl.style.display = 'none';
+    } else {
+      emojiEl.textContent = payload.randEmoji || '🎭';
+      emojiEl.style.filter = blur;
+      emojiEl.style.display = 'flex';
+      imgEl.style.display = 'none';
+    }
+
+    const bar = document.getElementById('dash-timer-bar');
+    bar.style.width = ((payload.timerPct || 1) * 100) + '%';
+    if (payload.timerPct < 0.3) bar.classList.add('urgent');
+    else bar.classList.remove('urgent');
+  }
+
+  if (type === 'quiz_question') {
+    showPanel('quiz-display');
+    document.getElementById('quiz-question-text').textContent = payload.question || '';
+    const opts = payload.opts || [];
+    document.getElementById('quiz-opts-grid').innerHTML = opts.map((o, i) =>
+      `<div class="quiz-opt-dash" id="qopt-${i}">
+        <span class="opt-letter">${['A','B','C','D'][i]})</span>${o}
+      </div>`
+    ).join('');
+  }
+
+  if (type === 'quiz_answer') {
+    const { correctIdx, chosenIdx } = payload;
+    document.querySelectorAll('.quiz-opt-dash').forEach((el, i) => {
+      if (i === correctIdx) el.classList.add('correct');
+      else if (i === chosenIdx) el.classList.add('wrong');
+    });
+  }
+
+  if (type === 'buzz_flash') {
+    showBuzzFlash(payload.side, payload.name);
+  }
+
+  if (type === 'word_category') {
+    showPanel('text-display');
+    document.getElementById('text-game-icon').textContent = '🔤';
+    document.getElementById('text-game-name').textContent = 'Wörter-Staffel';
+    document.getElementById('text-content').innerHTML =
+      `<strong>Kategorie:</strong><br>${payload.catName}<br><small style="opacity:0.5;">z.B. ${(payload.examples||[]).join(', ')}</small>`;
+  }
+
+  if (type === 'number_question') {
+    showPanel('text-display');
+    document.getElementById('text-game-icon').textContent = '🔢';
+    document.getElementById('text-game-name').textContent = 'Zahlen-Duell';
+    document.getElementById('text-content').textContent = payload.question || '';
+  }
+
+  if (type === 'tf_question') {
+    showPanel('text-display');
+    document.getElementById('text-game-icon').textContent = '✅';
+    document.getElementById('text-game-name').textContent = 'Wahr oder Falsch';
+    document.getElementById('text-content').textContent = payload.question || '';
+  }
+
+  if (type === 'emoji_question') {
+    showPanel('text-display');
+    document.getElementById('text-game-icon').textContent = payload.emojis || '🤩';
+    document.getElementById('text-game-name').textContent = 'Emoji-Rätsel';
+    document.getElementById('text-content').textContent = `Was bedeuten diese Emojis?\n(${payload.hint || ''})`;
+  }
+
+  if (type === 'physical') {
+    showPanel('text-display');
+    document.getElementById('text-game-icon').textContent = payload.icon || '🏃';
+    document.getElementById('text-game-name').textContent = payload.name || 'Körper-Challenge';
+    document.getElementById('text-content').textContent = payload.desc || '';
+  }
+});
+
+// Buzz events from buzzer devices
+channel.on('broadcast', { event: 'buzz' }, ({ payload }) => {
+  showBuzzFlash(payload.side, payload.playerName || (payload.side === 'left' ? 'Spieler 1' : 'Spieler 2'));
+});
+
+channel
+  .on('system', {}, ({ event }) => {
+    const status = document.getElementById('status');
+    if (event === 'SUBSCRIBED') {
+      status.textContent = '● VERBUNDEN — LIVE';
+      status.className = 'connected';
+    } else {
+      status.textContent = '● GETRENNT';
+      status.className = 'disconnected';
+    }
+  })
+  .subscribe();
+</script>
+</body>
+</html>
