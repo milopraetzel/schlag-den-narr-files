@@ -1,0 +1,15 @@
+{
+  "description": "Deploy-Konfiguration für Schlag den Narr",
+  "github_pages": {
+    "url": "https://milopraetzel.github.io/schlag-den-narr-files/",
+    "repo": "milopraetzel/schlag-den-narr-files",
+    "branch": "master",
+    "deploy_command": "git add -A && git commit -m \"<message>\" && git push origin master"
+  },
+  "pages": {
+    "index":  "index.html",
+    "host":   "host.html",
+    "tv":     "tv.html",
+    "buzzer": "buzzer.html"
+  }
+}
