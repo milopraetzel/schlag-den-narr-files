@@ -550,7 +550,7 @@ channel.on('broadcast', { event: 'display' }, ({ payload }) => {
 
   if (type === 'photo_blur') {
     showPanel('photo-display');
-    document.getElementById('game-badge').textContent = 'Wer bin ich?';
+    document.getElementById('game-badge').textContent = payload.photoQuestion || 'Wer bin ich?';
     const imgEl = document.getElementById('dash-photo-img');
     const emojiEl = document.getElementById('dash-photo-emoji');
     const blurVal = payload.blurLevel || 0;

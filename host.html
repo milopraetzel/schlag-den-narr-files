@@ -448,6 +448,8 @@
       <div style="font-size:0.72rem; color:var(--green); letter-spacing:2px; margin-top:6px; text-transform:uppercase;">Bild geladen</div>
     </div>
     <div style="font-size:0.72rem; opacity:0.35; text-align:center; margin-top:6px; letter-spacing:1px;">Kein Bild? Kein Problem — wir nutzen ein Demo-Bild.</div>
+    <!-- Mediathek quick-load -->
+    <div id="med-welcome" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);"></div>
     <button class="btn btn-primary w100 mt20" style="font-size:1.4rem; padding:18px;" onclick="startSetup()">
       SPIEL STARTEN
     </button>
@@ -630,7 +632,7 @@ function releaseBuzz() {
 }
 
 // Call after page load
-window.addEventListener('load', initRealtime);
+window.addEventListener('load', () => { initRealtime(); renderMedWelcome(); });
 
 // ═══════════════════════════════════════════════════
 //  GAME STATE
@@ -639,6 +641,7 @@ let state = {
   birthdayKid: '',
   challenger: '',  // kept for legacy compat = players[0]
   photoUrl: '',
+  photoQuestion: '',  // custom hint shown in photo game
   scores: { birthday: 0, challenger: 0 },
   playedGames: [],
   maxGames: 5,
@@ -778,6 +781,114 @@ function showScreen(id) {
   window.scrollTo(0, 0);
 }
 
+// ═══════════════════════════════════════════════════
+//  MEDIATHEK (Foto-Bibliothek)
+// ═══════════════════════════════════════════════════
+function getMed() {
+  try { return JSON.parse(localStorage.getItem('sdn_mediathek') || '[]'); } catch(e) { return []; }
+}
+function saveMed(lib) {
+  localStorage.setItem('sdn_mediathek', JSON.stringify(lib));
+}
+
+function applyPhotoSettings() {
+  const urlInput = document.getElementById('photo-url-c');
+  if (!state.photoUrl && urlInput && urlInput.value.trim()) {
+    state.photoUrl = urlInput.value.trim();
+  }
+  const qInput = document.getElementById('photo-q-c');
+  if (qInput) state.photoQuestion = qInput.value.trim();
+  showToast('✅ Einstellungen übernommen!');
+  renderCustomizeContent();
+}
+
+function loadPhotoFileC(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.photoUrl = e.target.result;
+    const urlInput = document.getElementById('photo-url-c');
+    if (urlInput) urlInput.value = '';
+    renderCustomizeContent();
+    showToast('✅ Bild geladen!');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhotoFileC() {
+  state.photoUrl = '';
+}
+
+function saveToMed() {
+  if (!state.photoUrl) { showToast('❗ Zuerst ein Bild laden!'); return; }
+  const nameEl = document.getElementById('med-save-name');
+  const name = nameEl?.value.trim() || ('Bild ' + new Date().toLocaleDateString('de-DE'));
+  const question = state.photoQuestion || '';
+  const lib = getMed();
+  lib.unshift({ id: Date.now(), name, imageData: state.photoUrl, question });
+  if (lib.length > 30) lib.splice(30);
+  saveMed(lib);
+  if (nameEl) nameEl.value = '';
+  showToast(`✅ "${name}" gespeichert!`);
+  renderCustomizeContent();
+  renderMedWelcome();
+}
+
+function loadFromMed(id) {
+  const item = getMed().find(i => i.id === id);
+  if (!item) return;
+  state.photoUrl = item.imageData;
+  state.photoQuestion = item.question || '';
+  showToast(`✅ "${item.name}" geladen!`);
+  // Update welcome screen preview too
+  const pw = document.getElementById('photo-preview-wrap');
+  const pi = document.getElementById('photo-preview-img');
+  const fl = document.getElementById('photo-file-label');
+  if (pw && pi) { pw.style.display = 'block'; pi.src = item.imageData; }
+  if (fl) { fl.style.borderColor = 'var(--green)'; fl.style.color = 'var(--green)'; }
+  renderCustomizeContent();
+  renderMedWelcome();
+}
+
+function deleteFromMed(id) {
+  saveMed(getMed().filter(i => i.id !== id));
+  showToast('Gelöscht');
+  renderCustomizeContent();
+  renderMedWelcome();
+}
+
+function medGridHTML(lib) {
+  if (lib.length === 0) return `<div style="text-align:center;opacity:0.35;padding:20px;font-size:0.85rem;letter-spacing:1px;">Noch keine Bilder gespeichert</div>`;
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;">
+    ${lib.map(item => `
+      <div onclick="loadFromMed(${item.id})" title="Klicken zum Laden"
+        style="background:var(--panel2);border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color 0.15s;"
+        onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='rgba(255,255,255,0.12)'">
+        <img src="${item.imageData}" style="width:100%;height:80px;object-fit:cover;display:block;">
+        <div style="padding:7px 8px;">
+          <div style="font-size:0.76rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${item.name}">${item.name}</div>
+          ${item.question ? `<div style="font-size:0.65rem;color:var(--text-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">"${item.question}"</div>` : ''}
+          <button onclick="event.stopPropagation();deleteFromMed(${item.id})"
+            style="background:none;border:none;color:rgba(255,90,90,0.55);font-size:0.65rem;cursor:pointer;margin-top:4px;padding:0;letter-spacing:1px;text-transform:uppercase;">✕ Löschen</button>
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function renderMedWelcome() {
+  const wrap = document.getElementById('med-welcome');
+  if (!wrap) return;
+  const lib = getMed();
+  if (lib.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  wrap.innerHTML = `
+    <div style="font-size:0.72rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">📚 Mediathek — schnell laden</div>
+    ${medGridHTML(lib)}
+  `;
+}
+
 // ── PHOTO FILE UPLOAD (no URL needed) ──
 function loadPhotoFile(input) {
   const file = input.files[0];
@@ -892,6 +1003,7 @@ function goToGameSelect() {
 //  CUSTOMIZE QUESTIONS
 // ═══════════════════════════════════════════════════
 const CUSTOMIZE_TABS = [
+  { key: 'photo',    label: '📸 Foto-Spiel',  color: '#E8B400' },
   { key: 'quiz',     label: '🧠 Quiz',       color: '#0066FF' },
   { key: 'trueFalse',label: '✅ Wahr/Falsch', color: '#009966' },
   { key: 'birthday', label: '🎂 Geburtstag',  color: '#FF6B00' },
@@ -901,7 +1013,7 @@ const CUSTOMIZE_TABS = [
   { key: 'physical', label: '🏃 Sport',       color: '#FF5500' },
 ];
 
-let currentCustomizeTab = 'quiz';
+let currentCustomizeTab = 'photo';
 
 function renderCustomizeTabs() {
   const tabBar = document.getElementById('customize-tabs');
@@ -925,7 +1037,45 @@ function renderCustomizeContent() {
   const items = state.customQuestions[key];
 
   let formHTML = '';
-  if (key === 'quiz') {
+  if (key === 'photo') {
+    const lib = getMed();
+    const hasImg = !!state.photoUrl;
+    formHTML = `
+      <div class="card" style="margin-bottom:14px;padding:18px;">
+        <div class="small-label mb10">Aktuelles Bild für das Foto-Rätsel</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <label style="flex:1;min-width:160px;padding:12px 16px;
+            background:rgba(255,255,255,0.05);border:1px dashed ${hasImg ? 'var(--green)' : 'rgba(255,255,255,0.2)'};
+            border-radius:4px;cursor:pointer;text-align:center;
+            font-family:'Roboto Condensed',sans-serif;font-size:0.9rem;
+            color:${hasImg ? 'var(--green)' : 'rgba(255,255,255,0.5)'};letter-spacing:1px;transition:all 0.2s;">
+            ${hasImg ? '✅ Bild geladen — ändern' : 'Bild vom Gerät auswählen'}
+            <input type="file" accept="image/*" style="display:none" onchange="loadPhotoFileC(this)">
+          </label>
+          <input class="input-field" id="photo-url-c" placeholder="oder Bild-URL (https://...)" type="url"
+            style="flex:1;min-width:160px;" oninput="clearPhotoFileC()" value="">
+        </div>
+        ${hasImg ? `<div style="text-align:center;margin-top:10px;">
+          <img src="${state.photoUrl}" style="max-height:120px;max-width:100%;border-radius:4px;border:1px solid rgba(255,255,255,0.15);">
+        </div>` : ''}
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div class="small-label mb8">Hinweis / Frage im Spiel zeigen</div>
+          <input class="input-field mb4" id="photo-q-c" placeholder="z.B. Wer ist das? / Welcher Film?" value="${state.photoQuestion || ''}">
+          <div style="font-size:0.7rem;opacity:0.35;letter-spacing:1px;margin-bottom:12px;">Wird oben im Spiel und auf dem TV angezeigt</div>
+          <button class="btn btn-cyan btn-small w100" onclick="applyPhotoSettings()">✅ Einstellungen übernehmen</button>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div class="small-label mb8">💾 In Mediathek speichern</div>
+          <input class="input-field mb8" id="med-save-name" placeholder="Name (z.B. Emil Party 2024)">
+          <button class="btn btn-secondary btn-small w100" onclick="applyPhotoSettings();saveToMed()">💾 Aktuelles Bild speichern</button>
+        </div>
+      </div>
+      <div class="small-label mb8">📚 Mediathek — ${lib.length} gespeichert</div>
+      ${medGridHTML(lib)}
+    `;
+    cont.innerHTML = formHTML;
+    return;
+  } else if (key === 'quiz') {
     formHTML = `
       <div class="card" style="margin-bottom:12px; padding:16px;">
         <div class="small-label mb10">Neue Quiz-Frage (Multiple Choice)</div>
@@ -1341,7 +1491,7 @@ function playPhotoReveal() {
 
   gc.innerHTML = `
     ${gameHeader(game)}
-    <div class="section-title" style="font-size:1.6rem;">📸 Wer ist das?</div>
+    <div class="section-title" style="font-size:1.6rem;">📸 ${state.photoQuestion || 'Wer ist das?'}</div>
     <div class="photo-hint" id="photo-hint">Das Bild wird langsam klarer... Drückt wenn ihr es wisst!</div>
     <div class="timer-bar-wrap"><div class="timer-bar-fill" id="photo-timer" style="width:100%"></div></div>
     <div class="photo-container" id="photo-box">
@@ -1414,6 +1564,7 @@ function playPhotoReveal() {
       type: 'photo_blur',
       blurLevel,
       photoUrl: state.photoUrl,
+      photoQuestion: state.photoQuestion || '',
       randEmoji,
       timerPct: 1 - pct,
       gameId: 'photo_reveal'
@@ -2371,7 +2522,7 @@ function showFinalResult() {
 
 function resetGame() {
   state = {
-    birthdayKid: '', challenger: '', photoUrl: '',
+    birthdayKid: '', challenger: '', photoUrl: '', photoQuestion: '',
     scores: { birthday: 0, challenger: 0 },
     playedGames: [], maxGames: 5, currentGame: null,
     currentPlayers: { left: '', right: '' },
